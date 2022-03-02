@@ -1,1 +1,1 @@
-A frontend application for picking items from multi-picking lists. The application uses the [DocumentAPI](https://github.com/thetis-apps/DocumentAPI) application as its backend.
+A frontend application for picking items from multi-picking lists and potentially other workflows based on documents at Yarnliving. The application uses the [DocumentAPI](https://github.com/thetis-apps/DocumentAPI) application as its backend.
