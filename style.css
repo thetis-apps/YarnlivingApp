@@ -1,0 +1,58 @@
+body {
+	font-family: 'Open Sans', sans-serif;
+	text-align: center;
+	overflow: hidden;
+}
+
+.view {
+    display: none;
+    height: 100%;
+}
+
+.row {
+    border: 1px solid black;
+    margin: 2px;
+    background: lightgray;
+    padding: 10px;
+    display: flex;
+}
+
+.cell {
+	padding: 10px;
+}
+
+.error {
+    display: none;
+    color: red;
+    font-size: 1.4em;
+}
+
+div[data-field-name='locationNumber'] {
+    font-size: 4em;
+    color: green;
+}
+
+div[data-field-name='productName'] {
+    font-size: 1.2em;
+}
+
+div[data-field-name='numItemsOrdered'] {
+    font-size: 1.2em;
+    color: red;
+}
+
+div[data-field-name='pickToBoxNumber'] {
+    font-size: 3em;
+    color: blue;
+}
+
+button {
+    margin-top: 1em;
+    min-width: 4em;
+    font-size: 2em;
+}
+
+.template {
+    display: none;
+}
+

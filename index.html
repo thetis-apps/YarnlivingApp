@@ -1,0 +1,86 @@
+<!DOCTYPE HTML>
+<html lang="da">
+    <head>
+        <title>Plukning</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Open+Sans"/>
+        <link rel="stylesheet" type="text/css" href="style.css"/>
+    	<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>    
+    	<script src="https://hammerjs.github.io/dist/hammer.js"></script>
+        <script src="script.js?version=09"></script>
+    </head>
+    <body>
+        
+        <div id="pickingListsView" class="view"> 
+            <h1>Plukkelister</h1>
+            <div class="table" data-table-name="pickingListTable"></div>
+            <div class="template row" data-table-name="pickingListTable">
+                <div class="cell" data-field-name="localizedDocumentType"></div>
+                <div class="cell" data-field-name="documentNumber"></div>
+                <div class="cell" data-field-name="localizedTimeCreated"></div>
+            </div>
+            <button data-action="refresh">Opfrisk</button>
+        </div>
+        
+        <div id="lineToPickView" class="view">
+            <h1>Vare at plukke</h1>
+            <div data-field-name="locationNumber"></div>
+            <div data-field-name="productName"></div>
+            <div data-field-name="productVariantKey.color"></div>
+            <div data-field-name="productVariantKey.size"></div>
+            <div data-field-name="productVariantKey.material"></div>
+            <div data-field-name="productVariantKey.packagingType"></div>
+            <div data-field-name="productVariantKey.description"></div>
+            <div data-field-name="numItemsOrdered"></div>
+            <div data-field-name="pickToBoxNumber"></div>
+            <div data-field-name="globalTradeItemNumber"></div>
+            <button data-action="confirm">Pluk</button>
+            <button data-action="options">...</button>
+            <div id="optionsPanel">
+	            <button data-action="previous">Forrige</button>
+	            <button data-action="next">Næste</button>
+            </div>
+        </div>
+        
+        <div id="linePickedView" class="view">
+            <h1>Plukket vare</h1>
+            <div data-field-name="locationNumber"></div>
+            <div data-field-name="productName"></div>
+            <div data-field-name="productVariantKey.color"></div>
+            <div data-field-name="productVariantKey.size"></div>
+            <div data-field-name="productVariantKey.material"></div>
+            <div data-field-name="productVariantKey.packagingType"></div>
+            <div data-field-name="productVariantKey.description"></div>
+            <div data-field-name="numItemsOrdered"></div>
+            <div data-field-name="pickToBoxNumber"></div>
+            <div data-field-name="globalTradeItemNumber"></div>
+            <button data-action="previous">Forrige</button>
+            <button data-action="next">Næste</button>
+            <button data-action="options">...</button>
+            <div id="optionsPanel">
+	            <button data-action="undo">Fortryd</button>
+	        </div>
+        </div>
+
+        <div id="errorView" class="view">
+            <h1>Læs besked</h1>
+            <div data-error="noLinesToPick" class="error">Der er ingen linjer til plukning.</div>
+            <div data-error="pickingListLocked" class="error">Plukkelisten er låst af en anden bruger.</div>
+            <button data-action="acknowledge">OK</button>
+        </div>
+        
+    </body>
+    <script>
+    
+        App.init([ document.getElementById('pickingListsView'),
+                document.getElementById('lineToPickView'),
+                document.getElementById('linePickedView'),
+                document.getElementById('errorView') ]);
+        
+ 		document.addEventListener("DOMContentLoaded", function(event) {
+            App.start();		    
+		});
+		
+    </script>
+</html>
