@@ -7,7 +7,7 @@
 var server = axios.create({
 		headers: { "Content-Type": "application/json" },
 		baseURL: 'DOCUMENT_API_URL'
-	});
+	}); 
 	
 function bind(element, datum) {
     console.log(JSON.stringify(datum));
