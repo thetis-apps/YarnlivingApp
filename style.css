@@ -54,6 +54,12 @@ div[data-field-name='numItemsSaleable'] {
     font-size: 2em;
 }
 
+div[data-field-name='notesOnPicking'] {
+    font-size: 1.5em;
+    background: lightyellow;
+    padding: 2em;
+}
+
 button {
     margin-top: 2em;
     min-width: 6em;
