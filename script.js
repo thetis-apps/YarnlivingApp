@@ -221,6 +221,9 @@ class LineState extends State {
 				optionsPanel.style.display = 'none';
 			}
 		}
+		
+		document.getElementById('lineIndexField').innerHTML = index;
+		document.getElementById('lineCountField').innerHTML = lines.length;
 
     }    
         
