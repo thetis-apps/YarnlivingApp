@@ -50,11 +50,14 @@ div[data-field-name='pickToBoxNumber'] {
     color: blue;
 }
 
+div[data-field-name='numItemsSaleable'] {
+    font-size: 2em;
+}
+
 button {
     margin-top: 2em;
-    min-height: 5em;
-    min-width: 8em;
-    font-size: 4em;
+    min-width: 6em;
+    font-size: 3em;
 }
 
 .template {
