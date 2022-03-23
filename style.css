@@ -21,10 +21,14 @@ body {
 	padding: 10px;
 }
 
+label {
+    font-size: 1.0em;
+}
+
 .error {
     display: none;
     color: red;
-    font-size: 1.4em;
+    font-size: 2em;
 }
 
 div[data-field-name='locationNumber'] {
@@ -33,11 +37,11 @@ div[data-field-name='locationNumber'] {
 }
 
 div[data-field-name='productName'] {
-    font-size: 1.2em;
+    font-size: 2em;
 }
 
 div[data-field-name='numItemsOrdered'] {
-    font-size: 1.2em;
+    font-size: 3em;
     color: red;
 }
 
@@ -47,9 +51,9 @@ div[data-field-name='pickToBoxNumber'] {
 }
 
 button {
-    margin-top: 1em;
-    min-width: 4em;
-    font-size: 2em;
+    margin-top: 2em;
+    min-width: 8em;
+    font-size: 4em;
 }
 
 .template {
