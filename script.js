@@ -23,8 +23,12 @@ function bind(element, datum) {
         } else {
             let field = element.querySelector('[data-field-name="' + fieldName + '"]');
             if (field != null) {
-                field.innerHTML = datum[fieldName];
-            }
+                if (value != null) {
+                    field.innerHTML = value;
+                } else {
+                    field.innerHTML = '';
+                }
+            } 
         }
     }
 } 
