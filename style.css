@@ -17,12 +17,16 @@ body {
     display: flex;
 }
 
+.line {
+    display: flex;
+}
+
 .cell {
 	padding: 10px;
 }
 
 label {
-    font-size: 1.0em;
+    font-size: 3em;
 }
 
 .error {
