@@ -19,6 +19,8 @@ body {
 
 .line {
     display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .cell {
@@ -26,6 +28,7 @@ body {
 }
 
 label {
+    padding-right: 1em;
     font-size: 3em;
 }
 
