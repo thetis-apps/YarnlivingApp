@@ -27,38 +27,38 @@ body {
 	padding: 10px;
 }
 
-label {
-    padding-right: 1em;
-    font-size: 3em;
-}
-
 .error {
     display: none;
     color: red;
     font-size: 2em;
 }
 
-div[data-field-name='locationNumber'] {
-    font-size: 4em;
-    color: green;
+.large {
+    font-size: 5em;
 }
 
-div[data-field-name='productName'] {
+.big {
+    font-size: 3em;
+}
+
+.medium {
     font-size: 2em;
 }
 
+.small {
+    font-size: 1em;
+}
+
+div[data-field-name='locationNumber'] {
+    color: green;
+}
+
 div[data-field-name='numItemsOrdered'] {
-    font-size: 3em;
     color: #EF53A9;
 }
 
 div[data-field-name='pickToBoxNumber'] {
-    font-size: 3em;
     color: #58B1B7;
-}
-
-div[data-field-name='numItemsSaleable'] {
-    font-size: 2em;
 }
 
 div[data-field-name='notesOnPicking'] {
@@ -70,12 +70,16 @@ div[data-field-name='notesOnPicking'] {
 button[data-action="confirm"] {
     margin-top: 2em;
     min-width: 12em;
-    font-size: 3em;
 }
 
 button[data-action="options"] {
     margin-top: 2em;
     min-width: 3em;
+}
+
+button[data-action="refresh"] {
+    margin-top: 2em;
+    min-width: 6em;
     font-size: 3em;
 }
 
