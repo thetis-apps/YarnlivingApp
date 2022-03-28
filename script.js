@@ -231,7 +231,7 @@ class LineState extends State {
 			}
 		}
 		
-		document.getElementById('lineIndexField').innerHTML = index;
+		document.getElementById('lineIndexField').innerHTML = index + 1;
 		document.getElementById('lineCountField').innerHTML = lines.length;
 
     }    
@@ -291,8 +291,8 @@ class LineToPickState extends LineState {
         };
         
         let postpone = async () => {
-            let line = lines.splice(index, 1);
-            lines.push(line);
+            let postponedLines = lines.splice(index, 1);
+            lines.push(postponedLines[0]);
             
             let i = 0;
             let found = false;
