@@ -10,7 +10,12 @@ var server = axios.create({
 	}); 
 	
 function bind(element, datum) {
-    console.log(JSON.stringify(datum));
+    
+    let elements = document.querySelectorAll('div[data-field-name]');
+    for (let element of elements) {
+        element.innerHTML = '';
+    }
+    
     for (let fieldName in datum) {
         let value = datum[fieldName];
         if (typeof value === 'object') {
@@ -300,7 +305,7 @@ class LineToPickState extends LineState {
                 }
             }
     
-            LinePickedState.enter(pickingListId, lines, i);
+            LineToPickState.enter(pickingListId, lines, i);
         };
         
         let confirmButton = this.view.querySelector('button[data-action="confirm"]');
