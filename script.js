@@ -285,6 +285,14 @@ class LineToPickState extends LineState {
             
         };
         
+        let postpone = async () => {
+            
+            let line = lines[index];
+            
+            
+            
+        };
+        
         let confirmButton = this.view.querySelector('button[data-action="confirm"]');
         confirmButton.onclick = confirm;
 
