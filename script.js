@@ -286,15 +286,28 @@ class LineToPickState extends LineState {
         };
         
         let postpone = async () => {
+            let line = lines.splice(index, 1);
+            lines.push(line);
             
-            let line = lines[index];
-            
-            
-            
+            let i = 0;
+            let found = false;
+            while (i < lines.length && !found) {
+                let line = lines[i];
+                if (!line.done) {
+                    found = true;
+                } else {
+                    i++;
+                }
+            }
+    
+            LinePickedState.enter(pickingListId, lines, i);
         };
         
         let confirmButton = this.view.querySelector('button[data-action="confirm"]');
         confirmButton.onclick = confirm;
+
+        let postponeButton = this.view.querySelector('button[data-action="postpone"]');
+        postponeButton.onclick = postpone;
 
     }
 }
