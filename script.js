@@ -11,7 +11,7 @@ var server = axios.create({
 	
 function bind(element, datum) {
     
-    let elements = document.querySelectorAll('div[data-field-name]');
+    let elements = element.querySelectorAll('div[data-field-name]');
     for (let element of elements) {
         element.innerHTML = '';
     }
