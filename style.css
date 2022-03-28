@@ -4,6 +4,10 @@ body {
 	overflow: hidden;
 }
 
+label {
+    padding-right: 1em;    
+}
+
 .view {
     display: none;
     height: 100%;
@@ -70,11 +74,13 @@ div[data-field-name='notesOnPicking'] {
 button[data-action="confirm"] {
     margin-top: 2em;
     min-width: 12em;
+    font-size: 3em;
 }
 
 button[data-action="options"] {
     margin-top: 2em;
     min-width: 3em;
+    font-size: 3em;
 }
 
 button[data-action="refresh"] {
