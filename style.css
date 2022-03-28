@@ -49,12 +49,12 @@ div[data-field-name='productName'] {
 
 div[data-field-name='numItemsOrdered'] {
     font-size: 3em;
-    color: red;
+    color: #EF53A9;
 }
 
 div[data-field-name='pickToBoxNumber'] {
     font-size: 3em;
-    color: blue;
+    color: #58B1B7;
 }
 
 div[data-field-name='numItemsSaleable'] {
@@ -63,13 +63,19 @@ div[data-field-name='numItemsSaleable'] {
 
 div[data-field-name='notesOnPicking'] {
     font-size: 1.5em;
-    background: lightyellow;
+    border: 1px solid black;
     padding: 2em;
 }
 
-button {
+button[data-action="confirm"] {
     margin-top: 2em;
-    min-width: 6em;
+    min-width: 12em;
+    font-size: 3em;
+}
+
+button[data-action="options"] {
+    margin-top: 2em;
+    min-width: 3em;
     font-size: 3em;
 }
 

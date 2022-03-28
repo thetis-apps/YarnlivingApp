@@ -27,11 +27,13 @@
             <h1>Vare at plukke</h1>
             <div data-field-name="locationNumber"></div>
             <div data-field-name="productName"></div>
-            <div data-field-name="productVariantKey.color"></div>
-            <div data-field-name="productVariantKey.size"></div>
-            <div data-field-name="productVariantKey.material"></div>
-            <div data-field-name="productVariantKey.packagingType"></div>
-            <div data-field-name="productVariantKey.description"></div>
+            <div class="line">
+                <div data-field-name="productVariantKey.color"></div>
+                <div data-field-name="productVariantKey.size"></div>
+                <div data-field-name="productVariantKey.material"></div>
+                <div data-field-name="productVariantKey.packagingType"></div>
+                <div data-field-name="productVariantKey.description"></div>
+            </div>
             <div class="line">
                 <label for="numItemsOrderedField">Antal</label>
                 <div id="numItemsOrderedField" data-field-name="numItemsOrdered"></div>
@@ -40,20 +42,29 @@
                 <label for="pickToBoxNumberField">Boks</label>
                 <div id="pickToBoxNumberField" data-field-name="pickToBoxNumber"></div>
             </div>
-            <div data-field-name="globalTradeItemNumber"></div>
-            <div data-field-name="notesOnPicking"></div>
             <div class="line">
-                <label for="numItemsSaleableField">Antal på lager</label>
-                <div id="numItemsSaleableField" data-field-name="numItemsSaleable"></div>
+                <button data-action="confirm">Pluk</button>
+                <button data-action="options">...</button>
             </div>
-            <button data-action="confirm">Pluk</button>
-            <button data-action="options">...</button>
             <div id="optionsPanel">
 	            <button data-action="previous">Forrige</button>
 	            <button data-action="next">Næste</button>
             </div>
             <div class="line">
                 <div id="lineIndexField"></div>/<div id="lineCountField"></div>
+            </div>
+            <div data-field-name="notesOnPicking"></div>
+            <div class="line">
+                <label for="stockKeepingUnitField">SKU:</label>
+                <div id="stockKeepingUnitField" data-field-name="stockKeepingUnit"></div>
+            </div>
+            <div class="line">
+                <label for="globalTradeItemNumberField">EAN:</label>
+                <div id="globalTradeItemNumberField" data-field-name="numItemsSaleable"></div>
+            </div>
+            <div class="line">
+                <label for="numItemsSaleableField">Antal på lager</label>
+                <div id="numItemsSaleableField" data-field-name="numItemsSaleable"></div>
             </div>
         </div>
         
