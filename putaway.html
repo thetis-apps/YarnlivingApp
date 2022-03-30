@@ -1,0 +1,98 @@
+<!DOCTYPE HTML>
+<html lang="da">
+    <head>
+        <title>Indlagring</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Open+Sans"/>
+        <link rel="stylesheet" type="text/css" href="style.css"/>
+    	<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>    
+    	<script src="https://hammerjs.github.io/dist/hammer.js"></script>
+        <script src="script.js?version=09"></script>
+    </head>
+    <body>
+        
+        <div id="putAwayListsView" class="view"> 
+            <h1>Plukkelister</h1>
+            <div class="table" data-table-name="putAwayListTable"></div>
+            <div class="template row" data-table-name="putAwayListTable">
+                <div class="cell" data-field-name="documentNumber"></div>
+                <div class="cell" data-field-name="localizedTimeCreated"></div>
+            </div>
+            <button data-action="refresh">Opfrisk</button>
+        </div>
+        
+        <div id="lineToPutAwayView" class="view">
+            <h1>Vare at indlagre</h1>
+            <div class="large" data-field-name="locationNumber"></div>
+            <div class="medium" data-field-name="productName"></div>
+            <div class="line small">
+                <div data-field-name="productVariantKey.color"></div>
+                <div data-field-name="productVariantKey.size"></div>
+                <div data-field-name="productVariantKey.material"></div>
+                <div data-field-name="productVariantKey.packagingType"></div>
+                <div data-field-name="productVariantKey.description"></div>
+            </div>
+            <button data-action="confirm">Placer</button>
+            <button data-action="options">...</button>
+            <div id="optionsPanel">
+	            <button data-action="previous">Forrige</button>
+	            <button data-action="next">Næste</button>
+            </div>
+            <div class="line small">
+                <label for="lineIndexField">Antal linjer</label>
+                <div id="lineIndexField"></div>/<div id="lineCountField"></div>
+            </div>
+            <button data-action="postpone">Udsæt</button>
+            <div class="line medium">
+                <label for="stockKeepingUnitField">SKU:</label>
+                <div id="stockKeepingUnitField" data-field-name="stockKeepingUnit"></div>
+            </div>
+            <div class="line small">
+                <label for="globalTradeItemNumberField">EAN:</label>
+                <div id="globalTradeItemNumberField" data-field-name="globalTradeItemNumber"></div>
+            </div>
+        </div>
+        
+        <div id="linePutAwayView" class="view">
+            <h1>Indlagret vare</h1>
+            <div data-field-name="locationNumber"></div>
+            <div data-field-name="productName"></div>
+            <div data-field-name="productVariantKey.color"></div>
+            <div data-field-name="productVariantKey.size"></div>
+            <div data-field-name="productVariantKey.material"></div>
+            <div data-field-name="productVariantKey.packagingType"></div>
+            <div data-field-name="productVariantKey.description"></div>
+            <div data-field-name="globalTradeItemNumber"></div>
+            <button data-action="previous">Forrige</button>
+            <button data-action="next">Næste</button>
+            <button data-action="options">...</button>
+            <div id="optionsPanel">
+	            <button data-action="undo">Fortryd</button>
+	        </div>
+            <div class="line">
+                <div id="lineIndexField"></div>/<div id="lineCountField"></div>
+            </div>
+        </div>
+
+        <div id="errorView" class="view">
+            <h1>Læs besked</h1>
+            <div data-error="noLinesToPick" class="error">Der er ingen linjer til plukning.</div>
+            <div data-error="pickingListLocked" class="error">Plukkelisten er låst af en anden bruger.</div>
+            <button data-action="acknowledge">OK</button>
+        </div>
+        
+    </body>
+    <script>
+    
+        App.init([ document.getElementById('putAwayListsView'),
+                document.getElementById('lineToPutAwayView'),
+                document.getElementById('linePutAwayView'),
+                document.getElementById('errorView') ]);
+        
+ 		document.addEventListener("DOMContentLoaded", function(event) {
+            App.start();		    
+		});
+		
+    </script>
+</html>

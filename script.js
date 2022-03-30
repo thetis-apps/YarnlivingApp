@@ -229,7 +229,7 @@ class LineState extends State {
 			} else {
 				optionsPanel.style.display = 'none';
 			}
-		}
+		};
 		
 		document.getElementById('lineIndexField').innerHTML = index + 1;
 		document.getElementById('lineCountField').innerHTML = lines.length;
@@ -332,5 +332,68 @@ class ErrorState extends State {
                 PickingListsState.enter();
             }; 
     }
+}
+
+class PutAwayListsState extends State {
+    
+    static async enter() {
+	
+		await super.enter();
+	        
+        let response = await server.get('/pendingPutAwayLists');
+        let putAwayLists = response.data;
+
+        let table = this.view.querySelector('.table[data-table-name="putAwayListTable"]');
+        let row = this.view.querySelector('.row.template[data-table-name="putAwayListTable"]');
+        
+        let choose = async (putAwayList) => {
+            
+            let response = await server.put('/multiPickingLists/' + putAwayList.id + '/workStatus', JSON.stringify('ON_GOING'), { validateStatus: function (status) {
+        		    return status == 200 || status == 422; 
+        		}});
+        	
+        	if (response.status == 422) {
+	
+        	    await ErrorState.enter('putAwayListLocked');
+        	
+        	} else {
+        	
+        	    let putAwayList = response.data;
+
+                // Mark all lines as not done
+    
+                let lines = putAwayList.globalTradeItemLotsToPutAway;
+                for (let i = 0; i < lines.length; i++) {
+                    lines[i].done = false;
+                }
+    
+//				Storage.persist(pickingList.id, lines);
+
+                if (lines.length == 0) {
+                    await ErrorState.enter('noLinesToPutAway');
+                } else {
+					await LineToPutAwayState.enter(putAwayList.id, lines, 0);
+                }
+                
+        	}
+        };
+        
+        let refresh = async () => {
+            await PutAwayListsState.enter();            
+        };
+
+        let refreshButton = this.view.querySelector('button[data-action="refresh"');
+        refreshButton.onclick = refresh;
+
+        bindToTable(table, row, putAwayLists, choose);
+
+    }
+
+}
+
+class LineToPutAwayState {
+    
+    enter() {};
+    
 }
 
