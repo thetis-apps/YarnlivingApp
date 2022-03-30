@@ -74,6 +74,20 @@ class App {
     }
 }
 
+class PutAwayApp {
+    
+    static init(views) {
+        PutAwayListsState.init(views[0]);
+        LineToPutAwayState.init(views[1]);
+        LinePutAwayState.init(views[2]);
+        ErrorState.init(views[3]);
+    }
+    
+    static async start() {
+        await PutAwayListsState.enter();
+    }
+}
+
 class State {
     
     static init(view) {
@@ -397,3 +411,8 @@ class LineToPutAwayState {
     
 }
 
+class LinePutAwayState {
+    
+    enter() {};
+    
+}
