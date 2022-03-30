@@ -407,11 +407,15 @@ class PutAwayListsState extends State {
 
 class LineToPutAwayState {
     
+    init() {};
+    
     enter() {};
     
 }
 
 class LinePutAwayState {
+    
+    init() {};
     
     enter() {};
     
