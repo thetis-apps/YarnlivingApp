@@ -405,18 +405,14 @@ class PutAwayListsState extends State {
 
 }
 
-class LineToPutAwayState {
+class LineToPutAwayState extends State {
     
-    init() {};
-    
-    enter() {};
+    static enter() {};
     
 }
 
-class LinePutAwayState {
+class LinePutAwayState extends State {
     
-    init() {};
-    
-    enter() {};
+    static enter() {};
     
 }
