@@ -6,7 +6,7 @@
 
 var server = axios.create({
 		headers: { "Content-Type": "application/json" },
-		baseURL: 'DOCUMENT_API_URL'
+		baseURL: 'https://https://2eaclsw0ob.execute-api.eu-west-1.amazonaws.com/Prod' // 'DOCUMENT_API_URL'
 	}); 
 	
 function bind(element, datum) {
