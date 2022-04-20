@@ -6,7 +6,7 @@
 
 var server = axios.create({
 		headers: { "Content-Type": "application/json" },
-		baseURL: 'DOCUMENT_API_URL'
+		baseURL: 'DOCUMENT_API_URL' // 'https://2eaclsw0ob.execute-api.eu-west-1.amazonaws.com/Prod' (Test subscription 379 context 550)
 	}); 
 	
 function bind(element, datum) {
@@ -56,7 +56,7 @@ function bindToTable(table, template, data, onclick) {
         table.appendChild(row);
         row.onclick = () => {
             onclick(datum);
-        }
+        };
     }
 }
 
@@ -135,7 +135,7 @@ class PickingListsState extends State {
         let pickingLists = response.data;
 
         let table = this.view.querySelector('.table[data-table-name="pickingListTable"]');
-        let row = this.view.querySelector('.row.template[data-table-name="pickingListTable"]');
+        let row = this.view.querySelector('.table-row.template[data-table-name="pickingListTable"]');
         
         let choose = async (pickingList) => {
             

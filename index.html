@@ -8,63 +8,73 @@
         <link rel="stylesheet" type="text/css" href="style.css"/>
     	<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>    
     	<script src="https://hammerjs.github.io/dist/hammer.js"></script>
-        <script src="script.js?version=09"></script>
+        <script src="script.js?version=13"></script>
     </head>
     <body>
         
         <div id="pickingListsView" class="view"> 
-            <h1>Plukkelister</h1>
-            <div class="table" data-table-name="pickingListTable"></div>
-            <div class="template row" data-table-name="pickingListTable">
-                <div class="cell" data-field-name="localizedDocumentType"></div>
-                <div class="cell" data-field-name="documentNumber"></div>
-                <div class="cell" data-field-name="localizedTimeCreated"></div>
+            <div class="line center big">Plukkelister</div>
+            <div class="table center" data-table-name="pickingListTable"></div>
+            <div class="template table-row" data-table-name="pickingListTable">
+                <div class="table-cell" data-field-name="localizedDocumentType"></div>
+                <div class="table-cell" data-field-name="documentNumber"></div>
+                <div class="table-cell" data-field-name="localizedTimeCreated"></div>
             </div>
-            <button data-action="refresh">Opfrisk</button>
+            <div class="line center">
+                <button class="big" data-action="refresh">Opfrisk</button>
+            </div>
         </div>
         
         <div id="lineToPickView" class="view">
-            <h1>Vare at plukke</h1>
-            <div class="large" data-field-name="locationNumber"></div>
-            <div class="medium" data-field-name="productName"></div>
-            <div class="line small">
+            <div class="large center" data-field-name="locationNumber"></div>
+            <div class="big center" data-field-name="productName"></div>
+            <div class="line medium center">
                 <div data-field-name="productVariantKey.color"></div>
                 <div data-field-name="productVariantKey.size"></div>
                 <div data-field-name="productVariantKey.material"></div>
                 <div data-field-name="productVariantKey.packagingType"></div>
                 <div data-field-name="productVariantKey.description"></div>
             </div>
-            <div class="line large">
+            <div class="line large center">
                 <label for="numItemsOrderedField">Antal</label>
                 <div id="numItemsOrderedField" data-field-name="numItemsOrdered"></div>
             </div>
-            <div class="line large">
+            <div class="line large center">
                 <label for="pickToBoxNumberField">Boks</label>
                 <div id="pickToBoxNumberField" data-field-name="pickToBoxNumber"></div>
             </div>
-            <button data-action="confirm">Pluk</button>
-            <button data-action="options">...</button>
-            <div id="optionsPanel">
-	            <button data-action="previous">Forrige</button>
-	            <button data-action="next">Næste</button>
+            <div class="line center">    
+                <button class="big" data-action="confirm">Pluk</button>
+                <button class="big" data-action="options">...</button>
             </div>
-            <div class="line small">
+            <div id="optionsPanel" class="line center">
+	            <button class="big" data-action="previous">Forrige</button>
+	            <button class="big" data-action="next">Næste</button>
+            </div>
+            <div class="line small center">
                 <label for="lineIndexField">Antal linjer</label>
                 <div id="lineIndexField"></div>/<div id="lineCountField"></div>
             </div>
             <div class="small" data-field-name="notesOnPicking"></div>
-            <button data-action="postpone">Udsæt</button>
-            <div class="line medium">
-                <label for="stockKeepingUnitField">SKU:</label>
-                <div id="stockKeepingUnitField" data-field-name="stockKeepingUnit"></div>
-            </div>
-            <div class="line small">
-                <label for="globalTradeItemNumberField">EAN:</label>
-                <div id="globalTradeItemNumberField" data-field-name="globalTradeItemNumber"></div>
-            </div>
-            <div class="line small">
-                <label for="numItemsSaleableField">Antal på lager</label>
-                <div id="numItemsSaleableField" data-field-name="numItemsSaleable"></div>
+            <div class="line">
+                <div class="half-width indent">    
+                    <button class="medium" data-action="postpone">Udsæt</button>
+                    <div class="line medium">
+                        <label for="stockKeepingUnitField">SKU:</label>
+                        <div id="stockKeepingUnitField" data-field-name="stockKeepingUnit"></div>
+                    </div>
+                    <div class="line small">
+                        <label for="globalTradeItemNumberField">EAN:</label>
+                        <div id="globalTradeItemNumberField" data-field-name="globalTradeItemNumber"></div>
+                    </div>
+                    <div class="line small">
+                        <label for="numItemsSaleableField">Antal på lager</label>
+                        <div id="numItemsSaleableField" data-field-name="numItemsSaleable"></div>
+                    </div>
+                </div>
+                <div class="half-width">
+                    
+                </div>
             </div>
         </div>
         
