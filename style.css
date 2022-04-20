@@ -1,6 +1,5 @@
 body {
 	font-family: 'Open Sans', sans-serif;
-	text-align: center;
 	overflow: hidden;
 }
 
@@ -11,9 +10,10 @@ label {
 .view {
     display: none;
     height: 100%;
+    margin: 1em;
 }
 
-.row {
+.table-row {
     border: 1px solid black;
     margin: 2px;
     background: lightgray;
@@ -23,11 +23,15 @@ label {
 
 .line {
     display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
-.cell {
+.center {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.table-cell {
 	padding: 10px;
 }
 
@@ -53,6 +57,27 @@ label {
     font-size: 1em;
 }
 
+.half-width {
+    width: 50%;
+}
+
+.indent {
+    padding-left: 2em;
+}
+
+button {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+    padding-right: 1em;
+    padding-left: 1em;
+    padding-top: 0.3em;
+    padding-bottom: 0.3em;
+}
+
+.template {
+    display: none;
+}
+
 div[data-field-name='locationNumber'] {
     color: green;
 }
@@ -68,28 +93,18 @@ div[data-field-name='pickToBoxNumber'] {
 div[data-field-name='notesOnPicking'] {
     font-size: 1.5em;
     border: 1px solid black;
-    padding: 2em;
+    padding: 0.5em;
+    margin: 0.5em;
+    text-align: left;
 }
 
 button[data-action="confirm"] {
-    margin-top: 2em;
     min-width: 12em;
-    font-size: 3em;
+    background: #4ab1ed;
+    color: white;
 }
 
 button[data-action="options"] {
-    margin-top: 2em;
     max-width: 3em;
-    font-size: 3em;
-}
-
-button {
-    margin-top: 2em;
-    min-width: 6em;
-    font-size: 3em;
-}
-
-.template {
-    display: none;
 }
 
