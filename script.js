@@ -8,7 +8,7 @@
 
 var server = axios.create({
 		headers: { "Content-Type": "application/json" },
-		baseURL: 'https://2eaclsw0ob.execute-api.eu-west-1.amazonaws.com/Prod' // 'DOCUMENT_API_URL' (Test subscription 379 context 550)
+		baseURL: 'DOCUMENT_API_URL' // 'https://2eaclsw0ob.execute-api.eu-west-1.amazonaws.com/Prod' (Test subscription 379 context 550)
 	}); 
 	
 function bind(element, datum) {
