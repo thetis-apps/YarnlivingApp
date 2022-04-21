@@ -96,6 +96,7 @@ div[data-field-name='notesOnPicking'] {
     padding: 0.5em;
     margin: 0.5em;
     text-align: left;
+    min-height: 4em;
 }
 
 button[data-action="confirm"] {

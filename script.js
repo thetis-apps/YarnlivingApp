@@ -2,11 +2,13 @@
 
 /* global Hammer */
 
+/* global JsBarcode */
+
 // Axios object to access server 
 
 var server = axios.create({
 		headers: { "Content-Type": "application/json" },
-		baseURL: 'DOCUMENT_API_URL' // 'https://2eaclsw0ob.execute-api.eu-west-1.amazonaws.com/Prod' (Test subscription 379 context 550)
+		baseURL: 'https://2eaclsw0ob.execute-api.eu-west-1.amazonaws.com/Prod' // 'DOCUMENT_API_URL' (Test subscription 379 context 550)
 	}); 
 	
 function bind(element, datum) {
@@ -60,34 +62,9 @@ function bindToTable(table, template, data, onclick) {
     }
 }
 
-class App {
-    
-    static init(views) {
-        PickingListsState.init(views[0]);
-        LineToPickState.init(views[1]);
-        LinePickedState.init(views[2]);
-        ErrorState.init(views[3]);
-    }
-    
-    static async start() {
-        await PickingListsState.enter();
-    }
-}
-
-class PutAwayApp {
-    
-    static init(views) {
-        PutAwayListsState.init(views[0]);
-        LineToPutAwayState.init(views[1]);
-        LinePutAwayState.init(views[2]);
-        ErrorState.init(views[3]);
-    }
-    
-    static async start() {
-        await PutAwayListsState.enter();
-    }
-}
-
+/**
+ * Top level state
+ */
 class State {
     
     static init(view) {
@@ -106,25 +83,107 @@ class State {
 
 }
 
-class Storage {
+/**
+ * A state related to a line in an array that offers browsing back and forth.
+ */
+class LineState extends State {
     
-    static persist(pickingListId, lines) {
-        window.localStorage.setItem(pickingListId, JSON.stringify(lines));            
+    static async next(list, lines) {
+        console.log("You must implement next method.");
+    }
+
+    static async next(list, lines) {
+        console.log("You must implement previous method.");
     }
     
-    static load(pickingListId) {
-		let s = window.localStorage.getItem(pickingListId);
+    static async enter(list, lines) {
+
+		await super.enter();        
+		
+		Storage.persist(list.documentType, list);
+
+		let line = lines[list.index];
+        bind(this.view, line);
+        
+		let optionsPanel = this.view.querySelector('#optionsPanel');
+		optionsPanel.style.display = 'none';
+
+        let next = async (e) => {
+			e.preventDefault();
+			await this.next(list, lines);
+        };
+        
+        let previous = async (e) => {
+			e.preventDefault();
+			await this.previous(list, lines);
+        };
+        
+        let hammer = new Hammer(this.view, { taps: 2 });
+        hammer.on("swipeleft", next);
+        hammer.on("swiperight", previous);
+
+        let previousButton = this.view.querySelector('button[data-action="previous"]');
+        if (list.index > 0) {     
+    		previousButton.disabled = false;
+    		previousButton.onclick = previous;
+        } else {
+            previousButton.disabled = true;
+        }
+		
+        let nextButton = this.view.querySelector('button[data-action="next"]');
+        if (list.index < lines.length - 1) {
+    		nextButton.disabled = false;
+    		nextButton.onclick = next;
+        } else {
+            nextButton.disabled = true;
+        }
+
+		let optionsButton = this.view.querySelector('button[data-action="options"]');
+		optionsButton.onclick = () => {
+			if (optionsPanel.style.display == 'none') {
+				optionsPanel.style.display = 'block';
+			} else {
+				optionsPanel.style.display = 'none';
+			}
+		};
+		
+		let pauseButton = this.view.querySelector('button[data-action="pause"]');
+        pauseButton.onclick = async () => {
+            StartState.enter();
+        };
+		
+		this.view.querySelector('#lineIndexField').innerHTML = list.index + 1;
+		this.view.querySelector('#lineCountField').innerHTML = lines.length;
+
+    }    
+        
+}
+
+/**
+ * Storing of objects in local storage
+ */ 
+class Storage {
+    
+    static persist(key, object) {
+        window.localStorage.setItem(key, JSON.stringify(object));            
+    }
+    
+    static load(key) {
+		let s = window.localStorage.getItem(key);
 		if (s == null) {
 			return null;	
 		}
         return JSON.parse(s);
     }
 
-	static clear(pickingListId) {
-		window.localStorage.removeItem(pickingListId);
+	static clear(key) {
+		window.localStorage.removeItem(key);
 	}
 }
 
+/**
+ * State showing pending picking lists for the user to choose.
+ */ 
 class PickingListsState extends State {
     
     static async enter() {
@@ -139,7 +198,8 @@ class PickingListsState extends State {
         
         let choose = async (pickingList) => {
             
-            let response = await server.put('/multiPickingLists/' + pickingList.id + '/workStatus', JSON.stringify('ON_GOING'), { validateStatus: function (status) {
+            pickingList.workStatus = 'ON_GOING';
+            let response = await server.put('/multiPickingLists/' + pickingList.id, pickingList, { validateStatus: function (status) {
         		    return status == 200 || status == 422; 
         		}});
         	
@@ -158,23 +218,42 @@ class PickingListsState extends State {
                     lines[i].done = false;
                 }
     
-//				Storage.persist(pickingList.id, lines);
-
                 if (lines.length == 0) {
                     await ErrorState.enter('noLinesToPick');
                 } else {
-					await LineToPickState.enter(pickingList.id, lines, 0);
+                    multiPickingList.index = 0;
+    				await LineToPickState.enter(multiPickingList, lines, 0);
                 }
                 
         	}
         };
         
-        let refresh = async () => {
-            await PickingListsState.enter();            
-        };
-
         let refreshButton = this.view.querySelector('button[data-action="refresh"');
-        refreshButton.onclick = refresh;
+        refreshButton.onclick = async () => {
+                await PickingListsState.enter();            
+            };
+
+        let menuButton = this.view.querySelector('button[data-action="menu"');
+        menuButton.onclick = async () => {
+                await StartState.enter();
+            };
+
+        let resumeButton = this.view.querySelector('button[data-action="resume"');
+        let multiPickingList = Storage.load('MULTI_PICKING_LIST');
+        if (multiPickingList != null) {
+    		resumeButton.disabled = false;
+        } else {
+            resumeButton.disabled = true;
+        }
+        resumeButton.onclick = async () => {
+                let lines = multiPickingList.shipmentLinesToPack;
+                let index = multiPickingList.index;
+    			if (lines[index].done) {
+                    await LinePickedState.enter(multiPickingList, lines, index);               
+    			} else {
+                    await LineToPickState.enter(multiPickingList, lines, index);               
+    			}
+            };
 
         bindToTable(table, row, pickingLists, choose);
 
@@ -182,86 +261,47 @@ class PickingListsState extends State {
 
 }
 
-class LineState extends State {
-
-    static async enter(pickingListId, lines, index) {
-
-		super.enter();        
-
-		let line = lines[index];
-        bind(this.view, line);
-        
-		let optionsPanel = this.view.querySelector('#optionsPanel');
-		optionsPanel.style.display = 'none';
-
-        let next = async (e) => {
-			e.preventDefault();
-            if (index < lines.length - 1) {
-				if (lines[index + 1].done) {
-	                LinePickedState.enter(pickingListId, lines, index + 1);               
-				} else {
-	                LineToPickState.enter(pickingListId, lines, index + 1);               
-				}
-            }
-        };
-        
-        let previous = async (e) => {
-			e.preventDefault();
-            if (index > 0) {
-				if (lines[index - 1].done) {
-					LinePickedState.enter(pickingListId, lines, index - 1);	
-				} else {
-	                LineToPickState.enter(pickingListId, lines, index - 1);
-				}
-            }
-        };
-        
-        let hammer = new Hammer(this.view, { taps: 2 });
-        hammer.on("swipeleft", next);
-        hammer.on("swiperight", previous);
-
-        let previousButton = this.view.querySelector('button[data-action="previous"]');
-        if (index > 0) {     
-    		previousButton.disabled = false;
-    		previousButton.onclick = previous;
-        } else {
-            previousButton.disabled = true;
-        }
-		
-        let nextButton = this.view.querySelector('button[data-action="next"]');
-        if (index < lines.length - 1) {
-    		nextButton.disabled = false;
-    		nextButton.onclick = next;
-        } else {
-            nextButton.disabled = true;
-        }
-
-		let optionsButton = this.view.querySelector('button[data-action="options"]');
-		optionsButton.onclick = () => {
-			if (optionsPanel.style.display == 'none') {
-				optionsPanel.style.display = 'block';
+/**
+ * A picking line
+ */ 
+class PickLineState extends LineState {
+    
+    static async next(multiPickingList, lines) {
+        if (multiPickingList.index < lines.length - 1) {
+			multiPickingList.index++;
+			if (lines[multiPickingList.index].done) {
+                await LinePickedState.enter(multiPickingList, lines);               
 			} else {
-				optionsPanel.style.display = 'none';
+                await LineToPickState.enter(multiPickingList, lines);               
 			}
-		};
-		
-		document.getElementById('lineIndexField').innerHTML = index + 1;
-		document.getElementById('lineCountField').innerHTML = lines.length;
+        }
+    }
+    
+    static async previous(multiPickingList, lines, index) {
+        if (multiPickingList.index > 0) {
+            multiPickingList.index--;
+			if (lines[multiPickingList.index].done) {
+				await LinePickedState.enter(multiPickingList, lines);	
+			} else {
+                await LineToPickState.enter(multiPickingList, lines);
+			}
+        }
+    }
 
-    }    
-        
 }
 
-class LinePickedState extends LineState {
+/**
+ * Showing line that has already been picked.
+ */ 
+class LinePickedState extends PickLineState {
 
-    static async enter(pickingListId, lines, index) {
+    static async enter(multiPickingList, lines) {
         
-        super.enter(pickingListId, lines, index);
+        await super.enter(multiPickingList, lines);
 
         let undo = async () => {
-            lines[index].done = false;     
-//			Storage.persist(pickingListId, lines);   
-            LineToPickState.enter(pickingListId, lines, index);
+            lines[multiPickingList.index].done = false;   
+            LineToPickState.enter(multiPickingList, lines);
         };
         
         let undoButton = this.view.querySelector('button[data-action="undo"]');
@@ -271,18 +311,19 @@ class LinePickedState extends LineState {
     
 }
 
-class LineToPickState extends LineState {
+/**
+ * Showing line to pick.
+ */ 
+class LineToPickState extends PickLineState {
     
-    static async enter(pickingListId, lines, index) {
+    static async enter(multiPickingList, lines) {
         
-        super.enter(pickingListId, lines, index);
+        await super.enter(multiPickingList, lines);
 
         let confirm = async () => {
         
-            lines[index].done = true; 
+            lines[multiPickingList.index].done = true; 
 
-//			Storage.persist(pickingListId, lines);       
-            
             let i = 0;
             let found = false;
             while (i < lines.length && !found) {
@@ -295,17 +336,19 @@ class LineToPickState extends LineState {
             }
             
             if (found) {
-                LineToPickState.enter(pickingListId, lines, i);
+                multiPickingList.index = i;
+                LineToPickState.enter(multiPickingList, lines);
             } else {
-	            await server.put('/multiPickingLists/' + pickingListId + '/workStatus', JSON.stringify('DONE'));
-//                Storage.clear(pickingListId);
+                multiPickingList.workStatus = 'DONE';
+	            await server.put('/multiPickingLists/' + multiPickingList.id, multiPickingList, JSON.stringify('DONE'));
+                Storage.clear('MULTI_PICKING_LIST');
 				await PickingListsState.enter();
             }
             
         };
         
         let postpone = async () => {
-            let postponedLines = lines.splice(index, 1);
+            let postponedLines = lines.splice(multiPickingList.index, 1);
             lines.push(postponedLines[0]);
             
             let i = 0;
@@ -319,7 +362,7 @@ class LineToPickState extends LineState {
                 }
             }
     
-            LineToPickState.enter(pickingListId, lines, i);
+            LineToPickState.enter(multiPickingList, lines, i);
         };
         
         let confirmButton = this.view.querySelector('button[data-action="confirm"]');
@@ -327,10 +370,15 @@ class LineToPickState extends LineState {
 
         let postponeButton = this.view.querySelector('button[data-action="postpone"]');
         postponeButton.onclick = postpone;
+        
+        JsBarcode("#barcode").EAN13(lines[multiPickingList.index].globalTradeItemNumber, {fontSize: 18, textMargin: 0}).render();
 
     }
 }
 
+/**
+ * Showing an error message 
+ */ 
 class ErrorState extends State {
     
     static async enter(error) {
@@ -348,6 +396,9 @@ class ErrorState extends State {
     }
 }
 
+/**
+ * Showing pending put-away lists to choose from
+ */ 
 class PutAwayListsState extends State {
     
     static async enter() {
@@ -358,11 +409,12 @@ class PutAwayListsState extends State {
         let putAwayLists = response.data;
 
         let table = this.view.querySelector('.table[data-table-name="putAwayListTable"]');
-        let row = this.view.querySelector('.row.template[data-table-name="putAwayListTable"]');
+        let row = this.view.querySelector('.table-row.template[data-table-name="putAwayListTable"]');
         
         let choose = async (putAwayList) => {
             
-            let response = await server.put('/multiPickingLists/' + putAwayList.id + '/workStatus', JSON.stringify('ON_GOING'), { validateStatus: function (status) {
+            putAwayList.workStatus = 'ON_GOING';
+            let response = await server.put('/putAwayLists/' + putAwayList.id, putAwayList, { validateStatus: function (status) {
         		    return status == 200 || status == 422; 
         		}});
         	
@@ -381,8 +433,6 @@ class PutAwayListsState extends State {
                     lines[i].done = false;
                 }
     
-//				Storage.persist(pickingList.id, lines);
-
                 if (lines.length == 0) {
                     await ErrorState.enter('noLinesToPutAway');
                 } else {
@@ -392,12 +442,16 @@ class PutAwayListsState extends State {
         	}
         };
         
-        let refresh = async () => {
-            await PutAwayListsState.enter();            
-        };
-
         let refreshButton = this.view.querySelector('button[data-action="refresh"');
-        refreshButton.onclick = refresh;
+        refreshButton.onclick = async () => {
+                await PutAwayListsState.enter();            
+            };
+
+        let menuButton = this.view.querySelector('button[data-action="menu"');
+        menuButton.onclick = async () => {
+                await StartState.enter();
+            }
+
 
         bindToTable(table, row, putAwayLists, choose);
 
@@ -416,3 +470,178 @@ class LinePutAwayState extends State {
     static enter() {};
     
 }
+
+/**
+ * Showing pending replenishment lists to choose from
+ */ 
+class ReplenishmentListsState extends State {
+    
+    static async enter() {
+	
+		await super.enter();
+	        
+        let response = await server.get('/pendingReplenishmentLists');
+        let putAwayLists = response.data;
+
+        let table = this.view.querySelector('.table[data-table-name="replenishmentListTable"]');
+        let row = this.view.querySelector('.table-row.template[data-table-name="replenishmentListTable"]');
+        
+        let choose = async (replenishmentList) => {
+            
+            replenishmentList.workStatus = 'ON_GOING';
+            let response = await server.put('/replenishmentLists/' + replenishmentList.id, replenishmentList, { validateStatus: function (status) {
+        		    return status == 200 || status == 422; 
+        		}});
+        	
+        	if (response.status == 422) {
+	
+        	    await ErrorState.enter('replenishmentListLocked');
+        	
+        	} else {
+        	
+        	    let replenishmentList = response.data;
+
+                // Mark all lines as not done
+    
+                let lines = replenishmentList.globalTradeItemsToReplenish;
+                for (let i = 0; i < lines.length; i++) {
+                    lines[i].picked = false;
+                    lines[i].placed = false;
+                }
+    
+                if (lines.length == 0) {
+                    await ErrorState.enter('noLinesToReplenish');
+                } else {
+//					await LineToPutAwayState.enter(replenishmentList.id, lines, 0);
+                }
+                
+        	}
+        };
+        
+        let refreshButton = this.view.querySelector('button[data-action="refresh"');
+        refreshButton.onclick = async () => {
+                await ReplenishmentListsState.enter();            
+            };
+
+        let menuButton = this.view.querySelector('button[data-action="menu"');
+        menuButton.onclick = async () => {
+                await StartState.enter();
+            };
+
+
+        bindToTable(table, row, putAwayLists, choose);
+
+    }
+
+}
+
+/**
+ * A state related to a replenishment line
+ */ 
+class ReplenishmentLineState extends LineState {
+    
+    static async next(id, lines, index) {
+        if (index < lines.length - 1) {
+			if (lines[index + 1].placed) {
+                ReplenishmentLinePlacedState.enter(id, lines, index + 1);               
+			} else if (lines[index + 1].picked) {
+                ReplenishmentLineToPlaceState.enter(id, lines, index + 1);               
+			} else {
+                ReplenishmentLineToPickState.enter(id, lines, index + 1);               
+			}
+        }
+    }
+    
+    static async previous(id, lines, index) {
+        if (index > 0) {
+			if (lines[index - 1].placed) {
+                ReplenishmentLinePlacedState.enter(id, lines, index + 1);               
+			} else if (lines[index - 1].picked) {
+                ReplenishmentLineToPlaceState.enter(id, lines, index + 1);               
+			} else {
+                ReplenishmentLineToPickState.enter(id, lines, index + 1);               
+			}
+        }
+    }
+
+}
+
+/**
+ * A state related to a replenishment line that has been picked and placed.
+ */ 
+class ReplenishmentLinePlacedState extends ReplenishmentLineState {
+    
+    static enter(replenishmentListId, lines, index) {
+        super.enter(replenishmentListId, lines, index);
+    }
+}
+
+/**
+ * A state related to a replenishment line that has been picked but not yet placed.
+ */ 
+class ReplenishmentLineToPlaceState extends ReplenishmentLineState {
+    
+    static enter(replenishmentListId, lines, index) {
+        super.enter(replenishmentListId, lines, index);
+    }
+}
+
+/**
+ * A state related to a replenishment line that has not yet been picked.
+ */ 
+class ReplenishmentLineToPickState extends ReplenishmentLineState {
+    
+    static enter(replenishmentListId, lines, index) {
+        super.enter(replenishmentListId, lines, index);
+    }
+}
+
+/**
+ * Show start view
+ */ 
+class StartState extends State {
+    
+    static async enter() {
+        await super.enter();
+        let pickingButton = this.view.querySelector('button[data-action="picking"');
+        pickingButton.onclick = async () => {
+                await PickingListsState.enter();           
+            };
+        let putAwayButton = this.view.querySelector('button[data-action="putAway"');
+        putAwayButton.onclick = async () => {
+                await PutAwayListsState.enter();           
+            };
+        let replenishmentButton = this.view.querySelector('button[data-action="replenishment"');
+        replenishmentButton.onclick = async () => {
+                await ReplenishmentListsState.enter();           
+            };
+        
+    }
+}
+
+/**
+ * The app itself.
+ */ 
+class App {
+    
+    static init(views) {
+        StartState.init(views[0]);
+        PickingListsState.init(views[1]);
+        LineToPickState.init(views[2]);
+        LinePickedState.init(views[3]);
+        PutAwayListsState.init(views[4]);
+        LineToPutAwayState.init(views[5]);
+        LinePutAwayState.init(views[6]);
+        ReplenishmentListsState.init(views[7]);
+        ReplenishmentLineToPickState.init(views[8]);
+        ReplenishmentLineToPlaceState.init(views[9]);
+        ReplenishmentLinePlacedState.init(views[10]);
+        ErrorState.init(views[11]);
+    }
+    
+    static async start() {
+        await StartState.enter();
+    }
+}
+
+
