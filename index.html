@@ -9,7 +9,7 @@
     	<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>    
     	<script src="https://hammerjs.github.io/dist/hammer.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
-        <script src="script.js?version=35"></script>
+        <script src="script.js?version=51"></script>
     </head>
     <body>
         
@@ -235,26 +235,172 @@
             </div>
             <div class="line center">
                 <button class="big" data-action="refresh">Opfrisk</button>
+                <button class="big" data-action="resume">Genoptag</button>
                 <button class="big" data-action="menu">Menu</button>
             </div>
         </div>
         
-        <!-- View to pick items for replenishemnt line -->
+        <!-- View to pick items for replenishment line -->
         
         <div id="replenishmentLineToPickView" class="view">
-            
+            <div class="large center" data-field-name="replenishFromLocationNumber"></div>
+            <div class="big center" data-field-name="productName"></div>
+            <div class="line medium center">
+                <div data-field-name="productVariantKey.color"></div>
+                <div data-field-name="productVariantKey.size"></div>
+                <div data-field-name="productVariantKey.material"></div>
+                <div data-field-name="productVariantKey.packagingType"></div>
+                <div data-field-name="productVariantKey.description"></div>
+            </div>
+            <div class="line large center">
+                <label for="numItemsToReplenishField">Antal</label>
+                <div id="numItemsToReplenishField" data-field-name="numItemsToReplenish"></div>
+            </div>
+            <div class="line large center">
+                <label for="boxNumberField">Boks</label>
+                <div id="boxNumberField" data-field-name="boxNumber"></div>
+            </div>
+            <div class="line small center">
+                <label for="lineIndexField">Antal linjer</label>
+                <div id="lineIndexField"></div>/<div id="lineCountField"></div>
+            </div>
+            <div class="line center">    
+                <button class="big" data-action="confirm">Læg i boks</button>
+                <button class="big" data-action="options">...</button>
+            </div>
+            <div id="optionsPanel" class="line center">
+	            <button class="big" data-action="previous">Forrige</button>
+	            <button class="big" data-action="next">Næste</button>
+	            <button class="big" data-action="pause">Pause</button>
+            </div>
+            <div class="line">
+                <div class="half">
+                    <div class="line medium">
+                        <label for="numItemsPickableField">Aktuelt niveau</label>
+                        <div id="numItemsPickableField" data-field-name="numItemsPickable"></div>
+                    </div>
+                    <div class="line medium">
+                        <label for="replenishLevelField">Opfyld ved niveau</label>
+                        <div id="replenishLevelField" data-field-name="replenishLevel"></div>
+                    </div>
+                    <div class="line medium">
+                        <label for="replenishUpToLevelField">Opfyld til niveau</label>
+                        <div id="replenishUpToLevelField" data-field-name="replenishUpToLevel"></div>
+                    </div>
+                </div>
+                <div class="half">
+                    
+                </div>
+            </div>
         </div>
 
         <!-- View to place items previously picked for replenishment line -->
         
         <div id="replenishmentLineToPlaceView" class="view">
-            
+            <div class="large center" data-field-name="locationNumber"></div>
+            <div class="big center" data-field-name="productName"></div>
+            <div class="line medium center">
+                <div data-field-name="productVariantKey.color"></div>
+                <div data-field-name="productVariantKey.size"></div>
+                <div data-field-name="productVariantKey.material"></div>
+                <div data-field-name="productVariantKey.packagingType"></div>
+                <div data-field-name="productVariantKey.description"></div>
+            </div>
+            <div class="line large center">
+                <label for="boxNumberField">Boks</label>
+                <div id="boxNumberField" data-field-name="boxNumber"></div>
+            </div>
+            <div class="line small center">
+                <label for="lineIndexField">Antal linjer</label>
+                <div id="lineIndexField"></div>/<div id="lineCountField"></div>
+            </div>
+            <div class="line center">    
+                <button class="big" data-action="confirm">Læg på lokation</button>
+                <button class="big" data-action="options">...</button>
+            </div>
+            <div id="optionsPanel" class="line center">
+	            <button class="big" data-action="previous">Forrige</button>
+	            <button class="big" data-action="next">Næste</button>
+	            <button class="big" data-action="undo">Fortryd</button>
+	            <button class="big" data-action="pause">Pause</button>
+            </div>
+            <div class="line">
+                <div class="half">
+                    <div class="line medium">
+                        <label for="numItemsPickableField">Aktuelt niveau</label>
+                        <div id="numItemsPickableField" data-field-name="numItemsPickable"></div>
+                    </div>
+                    <div class="line medium">
+                        <label for="replenishLevelField">Opfyld ved niveau</label>
+                        <div id="replenishLevelField" data-field-name="replenishLevel"></div>
+                    </div>
+                    <div class="line medium">
+                        <label for="replenishUpToLevelField">Opfyld til niveau</label>
+                        <div id="replenishUpToLevelField" data-field-name="replenishUpToLevel"></div>
+                    </div>
+                </div>
+                <div class="half">
+                    
+                </div>
+            </div>
         </div>
         
         <!-- View replenishment line previously picked and placed -->
         
         <div id="replenishmentLinePlacedView" class="view">
-            
+            <div class="line center">    
+                <div class="big center" data-field-name="replenishFromLocationNumber"></div>
+                <div class="big center">&rarr;</div>
+                <div class="big center" data-field-name="locationNumber"></div>
+            </div>
+            <div class="big center" data-field-name="productName"></div>
+            <div class="line medium center">
+                <div data-field-name="productVariantKey.color"></div>
+                <div data-field-name="productVariantKey.size"></div>
+                <div data-field-name="productVariantKey.material"></div>
+                <div data-field-name="productVariantKey.packagingType"></div>
+                <div data-field-name="productVariantKey.description"></div>
+            </div>
+            <div class="line medium center">
+                <label for="numItemsToReplenishField">Antal</label>
+                <div id="numItemsToReplenishField" data-field-name="numItemsToReplenish"></div>
+            </div>
+            <div class="line medium center">
+                <label for="boxNumberField">Boks</label>
+                <div id="boxNumberField" data-field-name="boxNumber"></div>
+            </div>
+            <div class="line small center">
+                <label for="lineIndexField">Antal linjer</label>
+                <div id="lineIndexField"></div>/<div id="lineCountField"></div>
+            </div>
+            <div class="line center">    
+	            <button class="big" data-action="previous">Forrige</button>
+	            <button class="big" data-action="next">Næste</button>
+                <button class="big" data-action="options">...</button>
+            </div>
+            <div id="optionsPanel" class="line center">
+	            <button class="big" data-action="undo">Fortryd</button>
+	            <button class="big" data-action="pause">Pause</button>
+            </div>
+            <div class="line">
+                <div class="half">
+                    <div class="line medium">
+                        <label for="numItemsPickableField">Aktuelt niveau</label>
+                        <div id="numItemsPickableField" data-field-name="numItemsPickable"></div>
+                    </div>
+                    <div class="line medium">
+                        <label for="replenishLevelField">Opfyld ved niveau</label>
+                        <div id="replenishLevelField" data-field-name="replenishLevel"></div>
+                    </div>
+                    <div class="line medium">
+                        <label for="replenishUpToLevelField">Opfyld til niveau</label>
+                        <div id="replenishUpToLevelField" data-field-name="replenishUpToLevel"></div>
+                    </div>
+                </div>
+                <div class="half">
+                    
+                </div>
+            </div>
         </div>
         
     </body>

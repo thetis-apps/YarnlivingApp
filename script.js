@@ -8,7 +8,8 @@
 
 var server = axios.create({
 		headers: { "Content-Type": "application/json" },
-		baseURL: 'DOCUMENT_API_URL' // 'https://2eaclsw0ob.execute-api.eu-west-1.amazonaws.com/Prod' (Test subscription 379 context 550)
+//		baseURL: 'DOCUMENT_API_URL'
+		baseURL: 'https://2eaclsw0ob.execute-api.eu-west-1.amazonaws.com/Prod' // (Test subscription 379 context 550)
 	}); 
 	
 function bind(element, datum) {
@@ -92,7 +93,7 @@ class LineState extends State {
         console.log("You must implement next method.");
     }
 
-    static async next(list, lines) {
+    static async previous(list, lines) {
         console.log("You must implement previous method.");
     }
     
@@ -340,7 +341,7 @@ class LineToPickState extends PickLineState {
                 LineToPickState.enter(multiPickingList, lines);
             } else {
                 multiPickingList.workStatus = 'DONE';
-	            await server.put('/multiPickingLists/' + multiPickingList.id, multiPickingList, JSON.stringify('DONE'));
+	            await server.put('/multiPickingLists/' + multiPickingList.id, multiPickingList);
                 Storage.clear('MULTI_PICKING_LIST');
 				await PickingListsState.enter();
             }
@@ -501,18 +502,27 @@ class ReplenishmentListsState extends State {
         	
         	    let replenishmentList = response.data;
 
-                // Mark all lines as not done
+                // Mark all lines as not picked nor packed and set all to be picked from first item lot
     
                 let lines = replenishmentList.globalTradeItemsToReplenish;
                 for (let i = 0; i < lines.length; i++) {
-                    lines[i].picked = false;
-                    lines[i].placed = false;
+                    let line = lines[i];
+                    line.picked = false;
+                    line.placed = false;
+                    line.replenishToExistingLot = false; // true;
+                    line.boxNumber = i + 1;
+                    let replenishFromLot = line.replenishFromLots[0];
+                    line.replenishFromLocationNumber = replenishFromLot.locationNumber;
+                    let numItemsNeeded = line.replenishUpToLevel - line.numItemsPickable;
+                    line.numItemsToReplenish = Math.min(replenishFromLot.numItemsRemaining, numItemsNeeded);
                 }
-    
+                
                 if (lines.length == 0) {
                     await ErrorState.enter('noLinesToReplenish');
                 } else {
-//					await LineToPutAwayState.enter(replenishmentList.id, lines, 0);
+                    lines.sort((a, b) => a.replenishFromLocationNumber.localeCompare(b.replenishFromLocationNumber));
+                    replenishmentList.index = 0;
+					await ReplenishmentLineToPickState.enter(replenishmentList, lines);
                 }
                 
         	}
@@ -528,6 +538,24 @@ class ReplenishmentListsState extends State {
                 await StartState.enter();
             };
 
+        let resumeButton = this.view.querySelector('button[data-action="resume"');
+        let replenishmentList = Storage.load('REPLENISHMENT_LIST');
+        if (replenishmentList != null) {
+    		resumeButton.disabled = false;
+        } else {
+            resumeButton.disabled = true;
+        }
+        resumeButton.onclick = async () => {
+                let lines = replenishmentList.globalTradeItemsToReplenish;
+                let index = replenishmentList.index;
+    			if (lines[index].placed) {
+                    await ReplenishmentLinePlacedState.enter(replenishmentList, lines);               
+    			} else if (lines[index].picked) {
+    			    await ReplenishmentLineToPlaceState.enter(replenishmentList, lines);
+    			} else {
+                    await ReplenishmentLineToPickState.enter(replenishmentList, lines);               
+    			}
+            };
 
         bindToTable(table, row, putAwayLists, choose);
 
@@ -540,26 +568,28 @@ class ReplenishmentListsState extends State {
  */ 
 class ReplenishmentLineState extends LineState {
     
-    static async next(id, lines, index) {
-        if (index < lines.length - 1) {
-			if (lines[index + 1].placed) {
-                ReplenishmentLinePlacedState.enter(id, lines, index + 1);               
-			} else if (lines[index + 1].picked) {
-                ReplenishmentLineToPlaceState.enter(id, lines, index + 1);               
+    static async next(list, lines) {
+        if (list.index < lines.length - 1) {
+            list.index++;    
+			if (lines[list.index].placed) {
+                await ReplenishmentLinePlacedState.enter(list, lines);               
+			} else if (lines[list.index].picked) {
+                await ReplenishmentLineToPlaceState.enter(list, lines);               
 			} else {
-                ReplenishmentLineToPickState.enter(id, lines, index + 1);               
+                await ReplenishmentLineToPickState.enter(list, lines);               
 			}
         }
     }
     
-    static async previous(id, lines, index) {
-        if (index > 0) {
-			if (lines[index - 1].placed) {
-                ReplenishmentLinePlacedState.enter(id, lines, index + 1);               
-			} else if (lines[index - 1].picked) {
-                ReplenishmentLineToPlaceState.enter(id, lines, index + 1);               
+    static async previous(list, lines) {
+        if (list.index > 0) {
+            list.index--;
+			if (lines[list.index].placed) {
+                await ReplenishmentLinePlacedState.enter(list, lines);               
+			} else if (lines[list.index].picked) {
+                await ReplenishmentLineToPlaceState.enter(list, lines);               
 			} else {
-                ReplenishmentLineToPickState.enter(id, lines, index + 1);               
+                await ReplenishmentLineToPickState.enter(list, lines);               
 			}
         }
     }
@@ -571,8 +601,17 @@ class ReplenishmentLineState extends LineState {
  */ 
 class ReplenishmentLinePlacedState extends ReplenishmentLineState {
     
-    static enter(replenishmentListId, lines, index) {
-        super.enter(replenishmentListId, lines, index);
+    static enter(replenishmentList, lines) {
+        super.enter(replenishmentList, lines);
+        
+        let undo = async () => {
+                lines[replenishmentList.index].placed = false;   
+                ReplenishmentLineToPlaceState.enter(replenishmentList, lines);
+            };
+        
+        let undoButton = this.view.querySelector('button[data-action="undo"]');
+        undoButton.onclick = undo;
+
     }
 }
 
@@ -581,8 +620,73 @@ class ReplenishmentLinePlacedState extends ReplenishmentLineState {
  */ 
 class ReplenishmentLineToPlaceState extends ReplenishmentLineState {
     
-    static enter(replenishmentListId, lines, index) {
-        super.enter(replenishmentListId, lines, index);
+    static async enter(replenishmentList, lines) {
+        
+        await super.enter(replenishmentList, lines);
+
+        let confirm = async () => {
+            
+            let line = lines[replenishmentList.index];
+            line.placed = true; 
+
+            // Search for a line that has not yet been placed
+            
+            let i = 0;
+            let found = false;
+            while (i < lines.length && !found) {
+                let line = lines[i];
+                if (!line.placed) {
+                    found = true;
+                } else {
+                    i++;
+                }
+            }
+        
+            if (found) {
+                replenishmentList.index = i;
+                await ReplenishmentLineToPlaceState.enter(replenishmentList, lines);
+            } else {
+                
+                // Search for a line not yet picked                
+ 
+                lines.sort((a, b) => a.replenishFromLocationNumber.localeCompare(b.replenishFromLocationNumber));
+               
+                i = 0;
+                found = false;
+                while (i < lines.length && !found) {
+                    let line = lines[i];
+                    if (!line.picked) {
+                        found = true;
+                    } else {
+                        i++;
+                    }
+                }
+                
+                if (found) {
+                    replenishmentList.index = i;
+                    await ReplenishmentLineToPickState.enter(replenishmentList, lines);
+                } else {
+                    replenishmentList.workStatus = 'DONE';
+    	            await server.put('/replenishmentLists/' + replenishmentList.id, replenishmentList);
+                    Storage.clear('REPLENISHMENT_LIST');
+    				await ReplenishmentListsState.enter();
+                }
+            }                
+
+        };
+        
+        let confirmButton = this.view.querySelector('button[data-action="confirm"]');
+        confirmButton.onclick = confirm;
+        
+        let undo = async () => {
+                lines[replenishmentList.index].picked = false;   
+                ReplenishmentLineToPickState.enter(replenishmentList, lines);
+            };
+        
+        let undoButton = this.view.querySelector('button[data-action="undo"]');
+        undoButton.onclick = undo;
+
+
     }
 }
 
@@ -591,8 +695,64 @@ class ReplenishmentLineToPlaceState extends ReplenishmentLineState {
  */ 
 class ReplenishmentLineToPickState extends ReplenishmentLineState {
     
-    static enter(replenishmentListId, lines, index) {
-        super.enter(replenishmentListId, lines, index);
+    static async enter(replenishmentList, lines) {
+        
+        await super.enter(replenishmentList, lines);
+
+        let confirm = async () => {
+            
+            let line = lines[replenishmentList.index];
+            line.picked = true; 
+
+            let replenishFromLot = line.replenishFromLots[0];
+            replenishFromLot.numItemsReplenished = Math.max(line.numItemsToReplenish, replenishFromLot.numItemsRemaining);
+
+            // Search for a line that has not yet been picked
+
+            let i = 0;
+            let found = false;
+            while (i < lines.length && !found) {
+                let line = lines[i];
+                if (!line.picked) {
+                    found = true;
+                } else {
+                    i++;
+                }
+            }
+            
+            if (found) {
+                replenishmentList.index = i;
+                await ReplenishmentLineToPickState.enter(replenishmentList, lines);
+            } else {
+                
+                lines.sort((a, b) => a.locationNumber.localeCompare(b.locationNumber));
+                
+                // Search for a line that has not yet been placed
+                
+                i = 0;
+                found = false;
+                while (i < lines.length && !found) {
+                    let line = lines[i];
+                    if (!line.placed) {
+                        found = true;
+                    } else {
+                        i++;
+                    }
+                }
+            
+                if (found) {
+                    replenishmentList.index = i;
+                    await ReplenishmentLineToPlaceState.enter(replenishmentList, lines);
+                } else {
+                    throw Error("Just picked a line!");
+                }                
+            }
+            
+        };
+        
+        let confirmButton = this.view.querySelector('button[data-action="confirm"]');
+        confirmButton.onclick = confirm;
+
     }
 }
 

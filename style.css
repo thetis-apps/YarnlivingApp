@@ -78,6 +78,10 @@ button {
     display: none;
 }
 
+div[data-field-name='replenishFromLocationNumber'] {
+    color: green;
+}
+
 div[data-field-name='locationNumber'] {
     color: green;
 }
@@ -87,6 +91,14 @@ div[data-field-name='numItemsOrdered'] {
 }
 
 div[data-field-name='pickToBoxNumber'] {
+    color: #58B1B7;
+}
+
+div[data-field-name='numItemsToReplenish'] {
+    color: #EF53A9;
+}
+
+div[data-field-name='boxNumber'] {
     color: #58B1B7;
 }
 
