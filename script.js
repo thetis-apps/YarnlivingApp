@@ -494,7 +494,23 @@ class ReplenishmentListsState extends State {
                     let replenishFromLot = line.replenishFromLots[0];
                     line.replenishFromLocationNumber = replenishFromLot.locationNumber;
                     let numItemsNeeded = line.replenishUpToLevel - line.numItemsPickable;
+
+                    // Round down to multipla of 20 or 10
+                    
+                    let multipla;
+                    if (replenishFromLot.numItemsRemaining % 20 == 0) {
+                        multipla = 20;
+                    } else {
+                        multipla = 10;
+                    }
+                    
+                    numItemsNeeded = Math.floor(numItemsNeeded / multipla) * multipla;
+                    if (numItemsNeeded == 0) {
+                        numItemsNeeded = multipla;
+                    }
+
                     line.numItemsToReplenish = Math.min(replenishFromLot.numItemsRemaining, numItemsNeeded);
+                    
                 }
                 
                 if (lines.length == 0) {
