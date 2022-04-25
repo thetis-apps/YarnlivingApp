@@ -206,8 +206,8 @@ class PickingListsState extends State {
         	
         	if (response.status == 422) {
 	
-        	    await ErrorState.enter('pickingListLocked');
-        	
+                window.alert(response.data.messageText);
+
         	} else {
         	
         	    let multiPickingList = response.data;
@@ -220,7 +220,7 @@ class PickingListsState extends State {
                 }
     
                 if (lines.length == 0) {
-                    await ErrorState.enter('noLinesToPick');
+                    window.alert('Der er ingen linjer til plukning på denne liste.');
                 } else {
                     multiPickingList.index = 0;
     				await LineToPickState.enter(multiPickingList, lines, 0);
@@ -378,26 +378,6 @@ class LineToPickState extends PickLineState {
 }
 
 /**
- * Showing an error message 
- */ 
-class ErrorState extends State {
-    
-    static async enter(error) {
-	
-		super.enter();
-	
-        let errorMessage = this.view.querySelector('[data-error="' + error + '"]'); 
-        errorMessage.style.display = 'block';
-        
-        let acknowledgeButton = this.view.querySelector('button[data-action="acknowledge"]');
-        acknowledgeButton.onclick = () => {
-                errorMessage.style.display = 'none';
-                PickingListsState.enter();
-            }; 
-    }
-}
-
-/**
  * Showing pending put-away lists to choose from
  */ 
 class PutAwayListsState extends State {
@@ -421,8 +401,8 @@ class PutAwayListsState extends State {
         	
         	if (response.status == 422) {
 	
-        	    await ErrorState.enter('putAwayListLocked');
-        	
+                window.alert(response.data.messageText);
+
         	} else {
         	
         	    let putAwayList = response.data;
@@ -435,7 +415,7 @@ class PutAwayListsState extends State {
                 }
     
                 if (lines.length == 0) {
-                    await ErrorState.enter('noLinesToPutAway');
+                    window.alert('Der er ingen beholdninger til indlagring på denne liste.');
                 } else {
 					await LineToPutAwayState.enter(putAwayList.id, lines, 0);
                 }
@@ -496,8 +476,8 @@ class ReplenishmentListsState extends State {
         	
         	if (response.status == 422) {
 	
-        	    await ErrorState.enter('replenishmentListLocked');
-        	
+                window.alert(response.data.messageText);
+
         	} else {
         	
         	    let replenishmentList = response.data;
@@ -518,7 +498,7 @@ class ReplenishmentListsState extends State {
                 }
                 
                 if (lines.length == 0) {
-                    await ErrorState.enter('noLinesToReplenish');
+                    window.alert('Der er ingen varer til opfyldning på denne liste.');
                 } else {
                     lines.sort((a, b) => a.replenishFromLocationNumber.localeCompare(b.replenishFromLocationNumber));
                     replenishmentList.index = 0;
@@ -796,7 +776,6 @@ class App {
         ReplenishmentLineToPickState.init(views[8]);
         ReplenishmentLineToPlaceState.init(views[9]);
         ReplenishmentLinePlacedState.init(views[10]);
-        ErrorState.init(views[11]);
     }
     
     static async start() {
