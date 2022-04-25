@@ -685,7 +685,7 @@ class ReplenishmentLineToPickState extends ReplenishmentLineState {
             line.picked = true; 
 
             let replenishFromLot = line.replenishFromLots[0];
-            replenishFromLot.numItemsReplenished = Math.max(line.numItemsToReplenish, replenishFromLot.numItemsRemaining);
+            replenishFromLot.numItemsReplenished = Math.min(line.numItemsToReplenish, replenishFromLot.numItemsRemaining);
 
             // Search for a line that has not yet been picked
 
