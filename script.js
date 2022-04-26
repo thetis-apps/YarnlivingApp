@@ -8,8 +8,8 @@
 
 var server = axios.create({
 		headers: { "Content-Type": "application/json" },
-//		baseURL: 'DOCUMENT_API_URL'
-		baseURL: 'https://2eaclsw0ob.execute-api.eu-west-1.amazonaws.com/Prod' // (Test subscription 379 context 550)
+		baseURL: 'DOCUMENT_API_URL'
+//		baseURL: 'https://2eaclsw0ob.execute-api.eu-west-1.amazonaws.com/Prod' // (Test subscription 379 context 550)
 	}); 
 	
 	
@@ -604,7 +604,7 @@ class ReplenishmentListsState extends State {
                     let line = lines[i];
                     line.picked = false;
                     line.placed = false;
-                    line.replenishToExistingLot = false; // true;
+                    line.replenishToExistingLot = true;
                     line.boxNumber = i + 1;
                     let replenishFromLot = line.replenishFromLots[0];
                     line.replenishFromLocationNumber = replenishFromLot.locationNumber;
