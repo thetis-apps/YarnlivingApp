@@ -8,9 +8,28 @@
 
 var server = axios.create({
 		headers: { "Content-Type": "application/json" },
-		baseURL: 'DOCUMENT_API_URL'
-//		baseURL: 'https://2eaclsw0ob.execute-api.eu-west-1.amazonaws.com/Prod' // (Test subscription 379 context 550)
+//		baseURL: 'DOCUMENT_API_URL'
+		baseURL: 'https://2eaclsw0ob.execute-api.eu-west-1.amazonaws.com/Prod' // (Test subscription 379 context 550)
 	}); 
+	
+	
+// Add a request interceptor
+server.interceptors.request.use(function (config) {
+        let blocker = document.getElementById('blocker');	
+        blocker.style.display = 'block';
+        return config;
+    }, function (error) {
+        return Promise.reject(error);
+    });
+
+// Add a response interceptor
+server.interceptors.response.use(function (response) {
+        let blocker = document.getElementById('blocker');	
+        blocker.style.display = 'none';
+        return response;
+    }, function (error) {
+        return Promise.reject(error);
+    });	
 	
 function bind(element, datum) {
     
@@ -417,7 +436,9 @@ class PutAwayListsState extends State {
                 if (lines.length == 0) {
                     window.alert('Der er ingen beholdninger til indlagring på denne liste.');
                 } else {
-					await LineToPutAwayState.enter(putAwayList.id, lines, 0);
+                    lines.sort((a, b) => a.globalTradeItemLocationNumber.localeCompare(b.globalTradeItemLocationNumber));
+                    putAwayList.index = 0;
+					await LineToPutAwayState.enter(putAwayList, lines);
                 }
                 
         	}
@@ -431,8 +452,24 @@ class PutAwayListsState extends State {
         let menuButton = this.view.querySelector('button[data-action="menu"');
         menuButton.onclick = async () => {
                 await StartState.enter();
-            }
+            };
 
+        let resumeButton = this.view.querySelector('button[data-action="resume"');
+        let putAwayList = Storage.load('PUT_AWAY_LIST');
+        if (putAwayList != null) {
+    		resumeButton.disabled = false;
+        } else {
+            resumeButton.disabled = true;
+        }
+        resumeButton.onclick = async () => {
+                let lines = putAwayList.globalTradeItemLotsToPutAway;
+                let index = putAwayList.index;
+    			if (lines[index].done) {
+                    await LinePutAwayState.enter(putAwayList, lines);               
+    			} else {
+                    await LineToPutAwayState.enter(putAwayList, lines);               
+    			}
+            };
 
         bindToTable(table, row, putAwayLists, choose);
 
@@ -440,15 +477,93 @@ class PutAwayListsState extends State {
 
 }
 
-class LineToPutAwayState extends State {
+/**
+ * A state related to a replenishment line
+ */ 
+class PutAwayLineState extends LineState {
     
-    static enter() {};
+    static async next(list, lines) {
+        if (list.index < lines.length - 1) {
+            list.index++;    
+			if (lines[list.index].done) {
+                await LinePutAwayState.enter(list, lines);               
+			} else {
+                await LineToPutAwayState.enter(list, lines);               
+			}
+        }
+    }
+    
+    static async previous(list, lines) {
+        if (list.index > 0) {
+            list.index--;
+			if (lines[list.index].done) {
+                await LinePutAwayState.enter(list, lines);               
+			} else {
+                await LineToPutAwayState.enter(list, lines);               
+			}
+        }
+    }
+
+}
+
+class LineToPutAwayState extends PutAwayLineState {
+    
+    static async enter(putAwayList, lines) {
+        
+        await super.enter(putAwayList, lines);
+   
+        let confirm = async () => {
+            
+            let line = lines[putAwayList.index];
+            line.done = true; 
+
+            // Search for a line that has not yet been placed
+            
+            let i = 0;
+            let found = false;
+            while (i < lines.length && !found) {
+                let line = lines[i];
+                if (!line.done) {
+                    found = true;
+                } else {
+                    i++;
+                }
+            }
+        
+            if (found) {
+                putAwayList.index = i;
+                await LineToPutAwayState.enter(putAwayList, lines);
+            } else {
+                putAwayList.workStatus = 'DONE';
+	            await server.put('/putAwayLists/' + putAwayList.id, putAwayList);
+                Storage.clear('PUT_AWAY_LIST');
+				await PutAwayListsState.enter();
+            }
+
+        };
+        
+        let confirmButton = this.view.querySelector('button[data-action="confirm"]');
+        confirmButton.onclick = confirm;
+     
+    }
     
 }
 
-class LinePutAwayState extends State {
+class LinePutAwayState extends PutAwayLineState {
     
-    static enter() {};
+    static async enter(putAwayList, lines) {
+        
+        await super.enter(putAwayList, lines);
+        
+        let undo = async () => {
+            lines[putAwayList.index].done = false;   
+            LineToPutAwayState.enter(putAwayList, lines);
+        };
+        
+        let undoButton = this.view.querySelector('button[data-action="undo"]');
+        undoButton.onclick = undo;
+        
+    }
     
 }
 

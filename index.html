@@ -9,9 +9,11 @@
     	<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>    
     	<script src="https://hammerjs.github.io/dist/hammer.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
-        <script src="script.js?version=55"></script>
+        <script src="script.js?version=64"></script>
     </head>
     <body>
+        
+        <div id="blocker" class="blocker"></div>
         
         <!-- View for choosing work flow -->
         
@@ -54,7 +56,7 @@
         <!-- View for picking or postponing a line -->
         
         <div id="lineToPickView" class="view">
-            <div class="large center" data-field-name="locationNumber"></div>
+            <div class="large center location" data-field-name="locationNumber"></div>
             <div class="big center" data-field-name="productName"></div>
             <div class="line medium center">
                 <div data-field-name="productVariantKey.color"></div>
@@ -65,11 +67,11 @@
             </div>
             <div class="line large center">
                 <label for="numItemsOrderedField">Antal</label>
-                <div id="numItemsOrderedField" data-field-name="numItemsOrdered"></div>
+                <div id="numItemsOrderedField" class="quantity" data-field-name="numItemsOrdered"></div>
             </div>
             <div class="line large center">
                 <label for="pickToBoxNumberField">Boks</label>
-                <div id="pickToBoxNumberField" data-field-name="pickToBoxNumber"></div>
+                <div id="pickToBoxNumberField" class="box" data-field-name="pickToBoxNumber"></div>
             </div>
             <div class="line center">    
                 <button class="big" data-action="confirm">Pluk</button>
@@ -111,7 +113,7 @@
         
         <div id="linePickedView" class="view">
             <div class="medium center">Plukket vare</div>
-            <div class="large center" data-field-name="locationNumber"></div>
+            <div class="large center location" data-field-name="locationNumber"></div>
             <div class="big center" data-field-name="productName"></div>
             <div class="line medium center">
                 <div data-field-name="productVariantKey.color"></div>
@@ -122,11 +124,11 @@
             </div>
             <div class="line medium center">
                 <label for="numItemsOrderedField">Antal</label>
-                <div id="numItemsOrderedField" data-field-name="numItemsOrdered"></div>
+                <div id="numItemsOrderedField" class="quantity" data-field-name="numItemsOrdered"></div>
             </div>
             <div class="line medium center">
                 <label for="pickToBoxNumberField">Boks</label>
-                <div id="pickToBoxNumberField" data-field-name="pickToBoxNumber"></div>
+                <div id="pickToBoxNumberField" class="box" data-field-name="pickToBoxNumber"></div>
             </div>
             <div class="line center">
                 <button class="big" data-action="previous">Forrige</button>
@@ -163,6 +165,7 @@
             </div>
             <div class="line center">
                 <button class="big" data-action="refresh">Opfrisk</button>
+                <button class="big" data-action="resume">Genoptag</button>
                 <button class="big" data-action="menu">Menu</button>
             </div>
         </div>
@@ -170,57 +173,94 @@
         <!-- View to put-away item lot -->
         
         <div id="lineToPutAwayView" class="view"> 
-            <h1>Vare at indlagre nu</h1>
-            <div class="large" data-field-name="locationNumber"></div>
-            <div class="medium" data-field-name="productName"></div>
-            <div class="line small">
+            <div class="large center location" data-field-name="globalTradeItemLocationNumber"></div>
+            <div class="big center" data-field-name="productName"></div>
+            <div class="line medium center">
                 <div data-field-name="productVariantKey.color"></div>
                 <div data-field-name="productVariantKey.size"></div>
                 <div data-field-name="productVariantKey.material"></div>
                 <div data-field-name="productVariantKey.packagingType"></div>
                 <div data-field-name="productVariantKey.description"></div>
             </div>
-            <button data-action="confirm">Placer</button>
-            <button data-action="options">...</button>
-            <div id="optionsPanel">
-	            <button data-action="previous">Forrige</button>
-	            <button data-action="next">Næste</button>
+            <div class="line big center">
+                <label for="numItemsRemainingField">Antal</label>
+                <div id="numItemsRemainingField" class="quantity" data-field-name="numItemsRemaining"></div>
             </div>
-            <div class="line small">
+            <div class="line big center">
+                <label for="locationNumberField">Boks</label>
+                <div id="locationNumberField" class="box" data-field-name="locationNumber"></div>
+            </div>
+            <div class="line center">
+                <button class="big" data-action="confirm">Læg på lokation</button>
+                <button class="big" data-action="options">...</button>
+            </div>
+            <div id="optionsPanel" class="line center">
+	            <button class="big" data-action="previous">Forrige</button>
+	            <button class="big" data-action="next">Næste</button>
+	            <button class="big" data-action="pause">Pause</button>
+            </div>
+            <div class="line small center">
                 <label for="lineIndexField">Antal linjer</label>
                 <div id="lineIndexField"></div>/<div id="lineCountField"></div>
             </div>
-            <button data-action="postpone">Udsæt</button>
-            <div class="line medium">
-                <label for="stockKeepingUnitField">SKU:</label>
-                <div id="stockKeepingUnitField" data-field-name="stockKeepingUnit"></div>
-            </div>
-            <div class="line small">
-                <label for="globalTradeItemNumberField">EAN:</label>
-                <div id="globalTradeItemNumberField" data-field-name="globalTradeItemNumber"></div>
+            <div class="line">
+                <div class="half">
+                    <div class="line medium">
+                        <label for="stockKeepingUnitField">SKU:</label>
+                        <div id="stockKeepingUnitField" data-field-name="stockKeepingUnit"></div>
+                    </div>
+                    <div class="line small">
+                        <label for="globalTradeItemNumberField">EAN:</label>
+                        <div id="globalTradeItemNumberField" data-field-name="globalTradeItemNumber"></div>
+                    </div>
+                </div>
             </div>
         </div>
         
         <!-- View to browse through allready put-away item lots -->
         
         <div id="linePutAwayView" class="view">
-            <h1>Indlagret vare</h1>
-            <div data-field-name="locationNumber"></div>
-            <div data-field-name="productName"></div>
-            <div data-field-name="productVariantKey.color"></div>
-            <div data-field-name="productVariantKey.size"></div>
-            <div data-field-name="productVariantKey.material"></div>
-            <div data-field-name="productVariantKey.packagingType"></div>
-            <div data-field-name="productVariantKey.description"></div>
-            <div data-field-name="globalTradeItemNumber"></div>
-            <button data-action="previous">Forrige</button>
-            <button data-action="next">Næste</button>
-            <button data-action="options">...</button>
-            <div id="optionsPanel">
-	            <button data-action="undo">Fortryd</button>
+            <div class="line center">    
+                <div class="big center" data-field-name="locationNumber"></div>
+                <div class="big center">&rarr;</div>
+                <div class="big center" data-field-name="globalTradeItemLocationNumber"></div>
+            </div>
+            <div class="big center" data-field-name="productName"></div>
+            <div class="line medium center">
+                <div data-field-name="productVariantKey.color"></div>
+                <div data-field-name="productVariantKey.size"></div>
+                <div data-field-name="productVariantKey.material"></div>
+                <div data-field-name="productVariantKey.packagingType"></div>
+                <div data-field-name="productVariantKey.description"></div>
+            </div>
+            <div class="line big center">
+                <label for="numItemsRemainingField">Antal</label>
+                <div id="numItemsRemainingField" class="quantity" data-field-name="numItemsRemaining"></div>
+            </div>
+            <div class="line center">
+                <button class="big" data-action="previous">Forrige</button>
+                <button class="big" data-action="next">Næste</button>
+                <button class="big" data-action="options">...</button>
+            </div>
+            <div id="optionsPanel" class="line center">
+	            <button class="big" data-action="undo">Fortryd</button>
+	            <button class="big" data-action="pause">Pause</button>
 	        </div>
-            <div class="line">
+            <div class="line small center">
+                <label for="lineIndexField">Antal linjer</label>
                 <div id="lineIndexField"></div>/<div id="lineCountField"></div>
+            </div>
+            <div class="line">
+                <div class="half">
+                    <div class="line medium">
+                        <label for="stockKeepingUnitField">SKU:</label>
+                        <div id="stockKeepingUnitField" data-field-name="stockKeepingUnit"></div>
+                    </div>
+                    <div class="line small">
+                        <label for="globalTradeItemNumberField">EAN:</label>
+                        <div id="globalTradeItemNumberField" data-field-name="globalTradeItemNumber"></div>
+                    </div>
+                </div>
             </div>
         </div>
         
@@ -243,7 +283,7 @@
         <!-- View to pick items for replenishment line -->
         
         <div id="replenishmentLineToPickView" class="view">
-            <div class="large center" data-field-name="replenishFromLocationNumber"></div>
+            <div class="large center location" data-field-name="replenishFromLocationNumber"></div>
             <div class="big center" data-field-name="productName"></div>
             <div class="line medium center">
                 <div data-field-name="productVariantKey.color"></div>
@@ -254,11 +294,11 @@
             </div>
             <div class="line large center">
                 <label for="numItemsToReplenishField">Antal</label>
-                <div id="numItemsToReplenishField" data-field-name="numItemsToReplenish"></div>
+                <div id="numItemsToReplenishField" class="quantity" data-field-name="numItemsToReplenish"></div>
             </div>
             <div class="line large center">
                 <label for="boxNumberField">Boks</label>
-                <div id="boxNumberField" data-field-name="boxNumber"></div>
+                <div id="boxNumberField" class="box" data-field-name="boxNumber"></div>
             </div>
             <div class="line small center">
                 <label for="lineIndexField">Antal linjer</label>
@@ -297,7 +337,7 @@
         <!-- View to place items previously picked for replenishment line -->
         
         <div id="replenishmentLineToPlaceView" class="view">
-            <div class="large center" data-field-name="locationNumber"></div>
+            <div class="large center location" data-field-name="locationNumber"></div>
             <div class="big center" data-field-name="productName"></div>
             <div class="line medium center">
                 <div data-field-name="productVariantKey.color"></div>
@@ -308,7 +348,7 @@
             </div>
             <div class="line large center">
                 <label for="boxNumberField">Boks</label>
-                <div id="boxNumberField" data-field-name="boxNumber"></div>
+                <div id="boxNumberField" class="box" data-field-name="boxNumber"></div>
             </div>
             <div class="line small center">
                 <label for="lineIndexField">Antal linjer</label>
@@ -363,11 +403,11 @@
             </div>
             <div class="line medium center">
                 <label for="numItemsToReplenishField">Antal</label>
-                <div id="numItemsToReplenishField" data-field-name="numItemsToReplenish"></div>
+                <div id="numItemsToReplenishField" class="quantity" data-field-name="numItemsToReplenish"></div>
             </div>
             <div class="line medium center">
                 <label for="boxNumberField">Boks</label>
-                <div id="boxNumberField" data-field-name="boxNumber"></div>
+                <div id="boxNumberField" class="box" data-field-name="boxNumber"></div>
             </div>
             <div class="line small center">
                 <label for="lineIndexField">Antal linjer</label>
@@ -420,8 +460,8 @@
                 document.getElementById('replenishmentLinePlacedView'),
                 document.getElementById('errorView') ]);
         
- 		document.addEventListener("DOMContentLoaded", function(event) {
-            App.start();		    
+ 		document.addEventListener("DOMContentLoaded", async function(event) {
+            await App.start();		    
 		});
 		
     </script>
