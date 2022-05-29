@@ -8,8 +8,8 @@
 
 var server = axios.create({
 		headers: { "Content-Type": "application/json" },
-		baseURL: 'DOCUMENT_API_URL'
-//		baseURL: 'https://2eaclsw0ob.execute-api.eu-west-1.amazonaws.com/Prod' // (Test subscription 379 context 550)
+//		baseURL: 'DOCUMENT_API_URL'
+		baseURL: 'https://2eaclsw0ob.execute-api.eu-west-1.amazonaws.com/Prod' // (Test subscription 379 context 550)
 	}); 
 	
 	
@@ -98,7 +98,7 @@ class State {
 			old.removeAttribute('current');
 		}
 		this.view.style.display = 'block';
-		this.view.setAttribute('current', 'true');		
+		this.view.setAttribute('current', 'true');
     }
 
 }
@@ -341,7 +341,7 @@ class LineToPickState extends PickLineState {
         await super.enter(multiPickingList, lines);
 
         let confirm = async () => {
-        
+            
             lines[multiPickingList.index].done = true; 
 
             let i = 0;
@@ -357,7 +357,7 @@ class LineToPickState extends PickLineState {
             
             if (found) {
                 multiPickingList.index = i;
-                LineToPickState.enter(multiPickingList, lines);
+                await LineToPickState.enter(multiPickingList, lines);
             } else {
                 multiPickingList.workStatus = 'DONE';
 	            await server.put('/multiPickingLists/' + multiPickingList.id, multiPickingList);
@@ -436,7 +436,19 @@ class PutAwayListsState extends State {
                 if (lines.length == 0) {
                     window.alert('Der er ingen beholdninger til indlagring på denne liste.');
                 } else {
-                    lines.sort((a, b) => a.globalTradeItemLocationNumber.localeCompare(b.globalTradeItemLocationNumber));
+                    lines.sort((a, b) => { 
+                            let result;
+                            if (a.globalTradeItemLocationNumber != null) { 
+                                if (b.globalTradeItemLocattionNumber != null) {
+                                    result = a.globalTradeItemLocationNumber.localeCompare(b.globalTradeItemLocationNumber);
+                                } else {
+                                    result = 1;
+                                }
+                            } else {
+                                result = -1;
+                            }
+                            return result;
+                        });
                     putAwayList.index = 0;
 					await LineToPutAwayState.enter(putAwayList, lines);
                 }
@@ -557,7 +569,7 @@ class LinePutAwayState extends PutAwayLineState {
         
         let undo = async () => {
             lines[putAwayList.index].done = false;   
-            LineToPutAwayState.enter(putAwayList, lines);
+            await LineToPutAwayState.enter(putAwayList, lines);
         };
         
         let undoButton = this.view.querySelector('button[data-action="undo"]');
@@ -717,7 +729,7 @@ class ReplenishmentLinePlacedState extends ReplenishmentLineState {
         
         let undo = async () => {
                 lines[replenishmentList.index].placed = false;   
-                ReplenishmentLineToPlaceState.enter(replenishmentList, lines);
+                await ReplenishmentLineToPlaceState.enter(replenishmentList, lines);
             };
         
         let undoButton = this.view.querySelector('button[data-action="undo"]');

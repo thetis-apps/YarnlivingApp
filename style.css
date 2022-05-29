@@ -11,6 +11,7 @@ label {
     display: none;
     height: 100%;
     margin: 1em;
+    transition: visibility 10s;
 }
 
 .table-row {
