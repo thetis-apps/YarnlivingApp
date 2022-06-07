@@ -439,7 +439,7 @@ class PutAwayListsState extends State {
                     lines.sort((a, b) => { 
                             let result;
                             if (a.globalTradeItemLocationNumber != null) { 
-                                if (b.globalTradeItemLocattionNumber != null) {
+                                if (b.globalTradeItemLocationNumber != null) {
                                     result = a.globalTradeItemLocationNumber.localeCompare(b.globalTradeItemLocationNumber);
                                 } else {
                                     result = 1;
