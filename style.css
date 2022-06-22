@@ -9,8 +9,10 @@ label {
 
 .view {
     display: none;
-    height: 100%;
+    height: 100vh;
+    overflow-y: auto;
     margin: 1em;
+    transition: visibility 10s;
 }
 
 .table-row {
@@ -78,15 +80,15 @@ button {
     display: none;
 }
 
-div[data-field-name='locationNumber'] {
+.location {
     color: green;
 }
 
-div[data-field-name='numItemsOrdered'] {
+.quantity {
     color: #EF53A9;
 }
 
-div[data-field-name='pickToBoxNumber'] {
+.box {
     color: #58B1B7;
 }
 
@@ -96,6 +98,7 @@ div[data-field-name='notesOnPicking'] {
     padding: 0.5em;
     margin: 0.5em;
     text-align: left;
+    min-height: 4em;
 }
 
 button[data-action="confirm"] {
@@ -107,4 +110,20 @@ button[data-action="confirm"] {
 button[data-action="options"] {
     max-width: 3em;
 }
+
+.blocker {
+	display: none;
+	z-index: 999;
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: auto;
+	bottom: auto;
+	width: 100%;
+	height: 100%;
+	background-color: white;
+	opacity: .90;
+}
+
+
 
