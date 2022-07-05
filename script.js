@@ -8,8 +8,8 @@
 
 var server = axios.create({
 		headers: { "Content-Type": "application/json" },
-		baseURL: 'DOCUMENT_API_URL'
-//		baseURL: 'https://2eaclsw0ob.execute-api.eu-west-1.amazonaws.com/Prod' // (Test subscription 379 context 550)
+//		baseURL: 'DOCUMENT_API_URL'
+		baseURL: 'https://2eaclsw0ob.execute-api.eu-west-1.amazonaws.com/Prod' // (Test subscription 379 context 550)
 	}); 
 	
 	
@@ -392,7 +392,7 @@ class LineToPickState extends PickLineState {
         postponeButton.onclick = postpone;
         
         JsBarcode("#barcode").EAN13(lines[multiPickingList.index].globalTradeItemNumber, {fontSize: 18, textMargin: 0}).render();
-
+        
     }
 }
 
