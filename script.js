@@ -8,8 +8,8 @@
 
 var server = axios.create({
 		headers: { "Content-Type": "application/json" },
-		baseURL: 'DOCUMENT_API_URL'
-// 		baseURL: 'https://2eaclsw0ob.execute-api.eu-west-1.amazonaws.com/Prod' // (Test subscription 379 context 550)
+//		baseURL: 'DOCUMENT_API_URL'
+ 		baseURL: 'https://2eaclsw0ob.execute-api.eu-west-1.amazonaws.com/Prod' // (Test subscription 379 context 550)
 	}); 
 	
 	
@@ -579,6 +579,32 @@ class LinePutAwayState extends PutAwayLineState {
     
 }
 
+function setLotToReplenishFrom(line) {
+                
+    let replenishFromLot = line.replenishFromLots[line.lotIndex];            
+                
+    line.replenishFromLocationNumber = replenishFromLot.locationNumber;
+    let numItemsNeeded = line.replenishUpToLevel - line.numItemsPickable;
+
+    // Round down to multipla of 20 or 10
+    
+    let multipla;
+    if (replenishFromLot.numItemsRemaining % 20 == 0) {
+        multipla = 20;
+    } else {
+        multipla = 10;
+    }
+    
+    numItemsNeeded = Math.floor(numItemsNeeded / multipla) * multipla;
+    if (numItemsNeeded == 0) {
+        numItemsNeeded = multipla;
+    }
+
+    line.numItemsToReplenish = Math.min(replenishFromLot.numItemsRemaining, numItemsNeeded);
+    
+}
+
+
 /**
  * Showing pending replenishment lists to choose from
  */ 
@@ -616,28 +642,11 @@ class ReplenishmentListsState extends State {
                     let line = lines[i];
                     line.picked = false;
                     line.placed = false;
+                    line.abandoned = false;
                     line.replenishToExistingLot = true;
                     line.boxNumber = i + 1;
-                    let replenishFromLot = line.replenishFromLots[0];
-                    line.replenishFromLocationNumber = replenishFromLot.locationNumber;
-                    let numItemsNeeded = line.replenishUpToLevel - line.numItemsPickable;
-
-                    // Round down to multipla of 20 or 10
-                    
-                    let multipla;
-                    if (replenishFromLot.numItemsRemaining % 20 == 0) {
-                        multipla = 20;
-                    } else {
-                        multipla = 10;
-                    }
-                    
-                    numItemsNeeded = Math.floor(numItemsNeeded / multipla) * multipla;
-                    if (numItemsNeeded == 0) {
-                        numItemsNeeded = multipla;
-                    }
-
-                    line.numItemsToReplenish = Math.min(replenishFromLot.numItemsRemaining, numItemsNeeded);
-                    
+                    line.lotIndex = 0;
+                    setLotToReplenishFrom(line);                    
                 }
                 
                 if (lines.length == 0) {
@@ -818,6 +827,54 @@ class ReplenishmentLineToPlaceState extends ReplenishmentLineState {
  */ 
 class ReplenishmentLineToPickState extends ReplenishmentLineState {
     
+    static async exit(replenishmentList, lines) {
+        
+        // Search for a line that has not yet been picked
+
+        let i = 0;
+        let found = false;
+        while (i < lines.length && !found) {
+            let line = lines[i];
+            if (!line.picked && !line.abandoned) {
+                found = true;
+            } else {
+                i++;
+            }
+        }
+        
+        if (found) {
+            replenishmentList.index = i;
+            await ReplenishmentLineToPickState.enter(replenishmentList, lines);
+        } else {
+            
+            lines.sort((a, b) => a.locationNumber.localeCompare(b.locationNumber));
+            
+            // Search for a line that has not yet been placed
+            
+            i = 0;
+            found = false;
+            while (i < lines.length && !found) {
+                let line = lines[i];
+                if (!line.placed && !line.abandoned) {
+                    found = true;
+                } else {
+                    i++;
+                }
+            }
+        
+            if (found) {
+                replenishmentList.index = i;
+                await ReplenishmentLineToPlaceState.enter(replenishmentList, lines);
+            } else {
+                replenishmentList.workStatus = 'DONE';
+	            await server.put('/replenishmentLists/' + replenishmentList.id, replenishmentList);
+                Storage.clear('REPLENISHMENT_LIST');
+				await ReplenishmentListsState.enter();
+            }                
+        }
+        
+    }
+    
     static async enter(replenishmentList, lines) {
         
         await super.enter(replenishmentList, lines);
@@ -827,52 +884,33 @@ class ReplenishmentLineToPickState extends ReplenishmentLineState {
             let line = lines[replenishmentList.index];
             line.picked = true; 
 
-            let replenishFromLot = line.replenishFromLots[0];
+            let replenishFromLot = line.replenishFromLots[line.lotIndex];
             replenishFromLot.numItemsReplenished = Math.min(line.numItemsToReplenish, replenishFromLot.numItemsRemaining);
 
-            // Search for a line that has not yet been picked
-
-            let i = 0;
-            let found = false;
-            while (i < lines.length && !found) {
-                let line = lines[i];
-                if (!line.picked) {
-                    found = true;
-                } else {
-                    i++;
-                }
-            }
-            
-            if (found) {
-                replenishmentList.index = i;
-                await ReplenishmentLineToPickState.enter(replenishmentList, lines);
-            } else {
-                
-                lines.sort((a, b) => a.locationNumber.localeCompare(b.locationNumber));
-                
-                // Search for a line that has not yet been placed
-                
-                i = 0;
-                found = false;
-                while (i < lines.length && !found) {
-                    let line = lines[i];
-                    if (!line.placed) {
-                        found = true;
-                    } else {
-                        i++;
-                    }
-                }
-            
-                if (found) {
-                    replenishmentList.index = i;
-                    await ReplenishmentLineToPlaceState.enter(replenishmentList, lines);
-                } else {
-                    throw Error("Just picked a line!");
-                }                
-            }
+            await this.exit(replenishmentList, lines);
             
         };
         
+        let lose = async () => {
+            
+            let line = lines[replenishmentList.index];
+            
+            let lot = line.replenishFromLots[line.lotIndex];    
+            lot.lost = true;
+            if (line.replenishFromLots.length > line.lotIndex + 1) {
+                line.lotIndex++;
+                setLotToReplenishFrom(line);
+            } else {
+                line.abandoned = true;
+            }
+            
+            await this.exit(replenishmentList, lines);
+
+        };
+        
+        let loseButton = this.view.querySelector('button[data-action="lose"]');
+        loseButton.onclick = lose;
+
         let confirmButton = this.view.querySelector('button[data-action="confirm"]');
         confirmButton.onclick = confirm;
 

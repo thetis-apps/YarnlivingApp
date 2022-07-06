@@ -132,5 +132,11 @@ button[data-action="options"] {
 	opacity: .90;
 }
 
-
+.deletion {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    background: red;
+    color: white;
+}
 
